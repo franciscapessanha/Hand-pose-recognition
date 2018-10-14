@@ -25,6 +25,7 @@ def get_samples(frame):
   height, width, _ = frame.shape
 
   hsv_frame = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+  hsv_frame = cv.medianBlur(hsv_frame,5)
 
   rect1_top = (int(width/2 - rectangle_size/2), int(height*(1/3) - rectangle_size/2))
   rect2_top = (int(width/2 - rectangle_size/2), int(height*(2/3) - rectangle_size/2))
@@ -61,5 +62,10 @@ def calculate_sample_values(sample1, sample2, offset_hue, offset_sat):
     sat_high_thresh = (1 + offset_sat) * sat2[max_loc2]
   if sat_high_thresh > 255:
     sat_high_thresh = 255
+
+  print('hue_low', hue_low_thresh)
+  print('hue_high',hue_high_thresh)
+  print('sat_low', sat_low_thresh)
+  print('sat_high', sat_high_thresh)
 
   return [(hue_low_thresh, sat_low_thresh, 0), (hue_high_thresh, sat_high_thresh, 255)]
