@@ -1,4 +1,5 @@
 import cv2 as cv
+import numpy as np
 
 rectangle_size = 20
 
@@ -33,16 +34,45 @@ def get_samples(frame):
   return calculate_sample_values(rect_1, rect_2)
 
 def calculate_sample_values(sample1, sample2):
-  offsetLowThreshold = 30
-  offsetHighThreshold = 30
 
-  meanSample1 = cv.mean(sample1)
-  meanSample2 = cv.mean(sample2)
+  
+  hue1, sat1, _ = cv.split(sample1)
+  hue2, sat2, _ = cv.split(sample2)
 
-  hLowThreshold = min([meanSample1[0], meanSample2[0]]) - offsetLowThreshold
-  hHighThreshold = max([meanSample1[0], meanSample2[0]]) + offsetHighThreshold
 
-  sLowThreshold = min([meanSample1[1], meanSample2[1]]) - offsetLowThreshold
-  sHighThreshold = max([meanSample1[1], meanSample2[1]]) + offsetHighThreshold
+  min_val1, max_val1, min_loc1, max_loc1 =  cv.minMaxLoc(hue1)
+  min_val2, max_val2, min_loc2, max_loc2 = cv.minMaxLoc(hue2)
 
-  return [(hLowThreshold, sLowThreshold, 0), (hHighThreshold, sHighThreshold, 255)]
+  print('min_val1 ', min_val1)  
+  print('min_val2 ', min_val2)
+
+  print('max_val1 ', max_val1)  
+  print('max_val2 ', max_val2)
+
+  offset_hue = 0.30
+  hLowThreshold = (1-offset_hue)* min(min_val1, min_val2)
+  if hLowThreshold < 0: hLowThreshold=0
+  hHighThreshold = (1+offset_hue)* max(max_val1, max_val2) 
+  if hHighThreshold > 180: hLowThreshold=180
+  
+  offset_sat = 0.80
+  if min(min_val1, min_val2) == min_val1: min_sat = (1-offset_sat)* sat1[min_loc1]
+  else: min_sat = (1-offset_sat)*  sat2[min_loc2]
+  if min_sat < 0: min_sat=0
+
+  if max(max_val1, max_val2) == max_val1: max_sat = (1+offset_sat)* sat1[max_loc1]
+  else: max_sat = (1+offset_sat)* sat2[max_loc2]
+  if max_sat > 255: max_sat = 255
+
+  #sLowThreshold = min([min_val1s, max_val2s]) - offsetLowThreshold
+  #sHighThreshold = max(max_val1s, max_val2s) + offsetHighThreshold
+
+  print('min_t ', hLowThreshold)  
+  print('max_t ', hHighThreshold)
+  print('min_s ', min_sat)  
+  print('max_s ', max_sat)
+  
+  
+
+  return [(hLowThreshold, min_sat, 0), (hHighThreshold, max_sat, 255)]
+ 
