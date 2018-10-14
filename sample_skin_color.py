@@ -55,7 +55,7 @@ def calculate_sample_values(sample1, sample2):
   hHighThreshold = (1+offset_hue)* max(max_val1, max_val2) 
   if hHighThreshold > 180: hLowThreshold=180
   
-  offset_sat = 0.80
+  offset_sat = 0.30
   if min(min_val1, min_val2) == min_val1: min_sat = (1-offset_sat)* sat1[min_loc1]
   else: min_sat = (1-offset_sat)*  sat2[min_loc2]
   if min_sat < 0: min_sat=0

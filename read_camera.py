@@ -32,11 +32,11 @@ while(True):
 
      
      #median: 
-     mask_filtered = cv.medianBlur(mask,5)
+     #mask_filtered = cv.medianBlur(mask,5)
 
      #closing with disk
-     #kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE,(3,3))
-     #mask_filtered = cv.morphologyEx(mask, cv.MORPH_CLOSE, kernel)
+     kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE,(3,3))
+     mask_filtered = cv.morphologyEx(mask, cv.MORPH_CLOSE, kernel)
      
      mask_filtered = cv.cvtColor(mask_filtered, cv.COLOR_GRAY2BGR)
      
