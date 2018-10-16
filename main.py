@@ -16,7 +16,7 @@ while(True):
 
   frame = cv.resize(frame, (0, 0), None, .50, .50) # Resizes frane with a scale factor of 0.5
 
-  key = cv.waitKey(1) # Waits for user key press
+  key = cv.waitKey(100) # Waits for user key press
 
   if key == 27: # Esc to quit
     break

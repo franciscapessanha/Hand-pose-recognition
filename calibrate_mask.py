@@ -21,11 +21,10 @@ def calcute_mask(frame, values):
   mask = cv.inRange(hsv_frame, *values)
 
   mask_filtered = cv.medianBlur(mask, 3)
-  cv.imshow('Before removing noise', mask)
- 
   mask_filtered = remove_noise(mask_filtered)
-
   mask_filtered = cv.medianBlur(mask_filtered, 3)
+
+  find_contours(mask_filtered)
 
   return mask_filtered
 
@@ -41,7 +40,12 @@ def remove_noise(mask):
   for label in range(1, nlabels):
     x,y,w,h,size = contours[label]
 
-    if size <= mask.size * 0.025: #if area < 2.5% of the total area - is noise
+    if size <= mask.size * 0.030: #if area < 2.5% of the total area - is noise
          mask_filtered[y:y+h, x:x+w] = 0
 
   return mask_filtered
+
+def  find_contours(mask):
+  img, contours, hierarchy = cv.findContours(mask, cv.RETR_TREE,cv.CHAIN_APPROX_SIMPLE)
+  cv.drawContours(img, contours,-1,(0,255,0),3)
+  cv.imshow('Image contours',img)
