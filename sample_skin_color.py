@@ -63,9 +63,4 @@ def calculate_sample_values(sample1, sample2, offset_hue, offset_sat):
   if sat_high_thresh > 255:
     sat_high_thresh = 255
 
-  print('hue_low', hue_low_thresh)
-  print('hue_high',hue_high_thresh)
-  print('sat_low', sat_low_thresh)
-  print('sat_high', sat_high_thresh)
-
   return [(hue_low_thresh, sat_low_thresh, 0), (hue_high_thresh, sat_high_thresh, 255)]

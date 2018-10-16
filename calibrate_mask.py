@@ -23,6 +23,7 @@ def calcute_mask(frame, values):
   mask_filtered = cv.medianBlur(mask, 3)
   mask_filtered = remove_noise(mask_filtered)
   mask_filtered = cv.medianBlur(mask_filtered, 3)
+  cv.imshow('Mask before contours', mask_filtered)
 
   find_contours(mask_filtered)
 
@@ -47,5 +48,7 @@ def remove_noise(mask):
 
 def  find_contours(mask):
   img, contours, hierarchy = cv.findContours(mask, cv.RETR_TREE,cv.CHAIN_APPROX_SIMPLE)
-  cv.drawContours(img, contours,-1,(0,255,0),3)
+  contours = sorted(contours, key = cv.contourArea, reverse = True)[:5] # get largest five contour area
+  img = cv.cvtColor(img,cv.COLOR_GRAY2BGR)
+  cv.drawContours(img, contours,-1,(0,255,0),1)
   cv.imshow('Image contours',img)
