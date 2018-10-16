@@ -2,9 +2,9 @@ import cv2 as cv
 import numpy as np
 from sample_skin_color import calculate_sample_values
 
-sat_offset_low = 30
-sat_offset_high = 30
-hue_offset = 30
+hue_offset = 60
+sat_offset_high = 60
+sat_offset_low = 50
 
 def set_sat_offset_low(value):
   global sat_offset_low
@@ -66,4 +66,15 @@ def  find_contours(mask):
   contours = sorted(contours, key = cv.contourArea, reverse = True)[:5] # get largest five contour area
   img = cv.cvtColor(img,cv.COLOR_GRAY2BGR)
   cv.drawContours(img, contours,-1,(0,255,0),1)
+
+  hull = [cv.convexHull(contour,False) for contour in contours]
+  
+  for i in range(len(contours)):
+    color = (0, 0, 255) # blue - color for convex hull
+    # draw ith convex hull object
+    cv.drawContours(img, hull, i, color, 3, 8)
+
   cv.imshow('Image contours',img)
+
+
+
