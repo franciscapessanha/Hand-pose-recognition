@@ -2,24 +2,33 @@ import cv2 as cv
 import numpy as np
 from sample_skin_color import calculate_sample_values
 
-sat_offset_low_default = 30
-sat_offset_high_default = 30
+sat_offset_low = 30
+sat_offset_high = 30
+hue_offset = 30
+
+def set_sat_offset_low(value):
+  global sat_offset_low
+  sat_offset_low = value
+
+def set_sat_offset_high(value):
+  global sat_offset_high
+  sat_offset_high = value
+
+def set_hue_offset(value):
+  global hue_offset
+  hue_offset = value
 
 def nothing(x):
   pass
 
 def create_calibrate_window():
   cv.namedWindow("Calibrate")
-  cv.createTrackbar("Sat Offset High", "Calibrate", sat_offset_high_default, 100, nothing)
-  cv.createTrackbar("Sat Offset Low", "Calibrate", sat_offset_low_default, 100, nothing)
+  cv.createTrackbar("Hue Offset", "Calibrate", hue_offset, 100, set_hue_offset)
+  cv.createTrackbar("Sat Offset High", "Calibrate", sat_offset_high, 100, set_sat_offset_high)
+  cv.createTrackbar("Sat Offset Low", "Calibrate", sat_offset_low, 100, set_sat_offset_low)
 
 def get_calibrate_values(samples):
-  sat_offset_low = cv.getTrackbarPos("Sat Offset Low", "Calibrate")/100
-  sat_offset_high = cv.getTrackbarPos("Sat Offset High", "Calibrate")/100
-  return calculate_sample_values(*samples, sat_offset_low, sat_offset_high)
-
-def get_default_values(samples):
-  return calculate_sample_values(*samples, sat_offset_low_default/100, sat_offset_high_default/100)
+  return calculate_sample_values(*samples, hue_offset/100, sat_offset_low/100, sat_offset_high/100)
 
 def calcute_mask(frame, values):
   frame = cv.medianBlur(frame, 5)

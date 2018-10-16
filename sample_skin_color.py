@@ -34,8 +34,7 @@ def get_samples(frame):
 
   return [rect1, rect2]
 
-def calculate_sample_values(sample1, sample2, offset_sat_low, offset_sat_high):
-  offset_hue = 0
+def calculate_sample_values(sample1, sample2, offset_hue, offset_sat_low, offset_sat_high):
   hue1, sat1, _ = cv.split(sample1)
   hue2, sat2, _ = cv.split(sample2)
 
