@@ -34,7 +34,8 @@ def get_samples(frame):
 
   return [rect1, rect2]
 
-def calculate_sample_values(sample1, sample2, offset_hue, offset_sat):
+def calculate_sample_values(sample1, sample2, offset_sat_low, offset_sat_high):
+  offset_hue = 0
   hue1, sat1, _ = cv.split(sample1)
   hue2, sat2, _ = cv.split(sample2)
 
@@ -50,22 +51,17 @@ def calculate_sample_values(sample1, sample2, offset_hue, offset_sat):
     hue_high_thresh = 180
   
   if min_val1 <= min_val2:
-    sat_low_thresh = (1 - offset_sat) * sat1[min_loc1]
+    sat_low_thresh = (1 - offset_sat_low) * sat1[min_loc1]
   else: 
-    sat_low_thresh = (1 - offset_sat) * sat2[min_loc2]
+    sat_low_thresh = (1 - offset_sat_low) * sat2[min_loc2]
   if sat_low_thresh < 0:
     sat_low_thresh = 0
 
   if max_val1 >= max_val2:
-    sat_high_thresh = (1 + offset_sat) * sat1[max_loc1]
+    sat_high_thresh = (1 + offset_sat_high) * sat1[max_loc1]
   else:
-    sat_high_thresh = (1 + offset_sat) * sat2[max_loc2]
+    sat_high_thresh = (1 + offset_sat_high) * sat2[max_loc2]
   if sat_high_thresh > 255:
     sat_high_thresh = 255
-
-  print('hue_low', hue_low_thresh)
-  print('hue_high',hue_high_thresh)
-  print('sat_low', sat_low_thresh)
-  print('sat_high', sat_high_thresh)
 
   return [(hue_low_thresh, sat_low_thresh, 0), (hue_high_thresh, sat_high_thresh, 255)]
