@@ -56,23 +56,30 @@ def remove_noise(mask):
   for label in range(1, nlabels):
     x,y,w,h,size = contours[label]
 
-    if size <= mask.size * 0.030: #if area < 2.5% of the total area - is noise
+    if size <= mask.size * 0.05: #if area < 2.5% of the total area - is noise
          mask_filtered[y:y+h, x:x+w] = 0
 
   return mask_filtered
 
 def  find_contours(mask):
   img, contours, hierarchy = cv.findContours(mask, cv.RETR_TREE,cv.CHAIN_APPROX_SIMPLE)
-  contours = sorted(contours, key = cv.contourArea, reverse = True)[:5] # get largest five contour area
+  contours = sorted(contours, key = cv.contourArea, reverse = True) 
+  contours = [contours[i] for i in range(len(contours)) if cv.contourArea(contours[i]) > 0.20 * cv.contourArea(contours[0])]
   img = cv.cvtColor(img,cv.COLOR_GRAY2BGR)
   cv.drawContours(img, contours,-1,(0,255,0),1)
-
-  hull = [cv.convexHull(contour,False) for contour in contours]
   
+  hulls = [cv.convexHull(contour,False) for contour in contours]
+  
+
   for i in range(len(contours)):
     color = (0, 0, 255) # blue - color for convex hull
     # draw ith convex hull object
-    cv.drawContours(img, hull, i, color, 3, 8)
+    cv.drawContours(img, hulls, i, color, 3, 8)
+
+    for hull in hulls:
+      for point in hull:
+        cv.circle(img,(point.item(0), point.item(1)),10,(255,0,0),1)
+       
 
   cv.imshow('Image contours',img)
 
