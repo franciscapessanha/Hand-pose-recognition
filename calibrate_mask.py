@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 from sample_skin_color import calculate_sample_values
+from sklearn.cluster import DBSCAN
 
 hue_offset = 60
 sat_offset_high = 60
@@ -38,9 +39,9 @@ def calcute_mask(frame, values):
   mask_filtered = cv.medianBlur(mask, 3)
   mask_filtered = remove_noise(mask_filtered)
   mask_filtered = cv.medianBlur(mask_filtered, 3)
-  cv.imshow('Mask before contours', mask_filtered)
+  # cv.imshow('Mask before contours', mask_filtered)
 
-  find_contours(mask_filtered)
+  calculate_contours(mask_filtered)
 
   return mask_filtered
 
@@ -52,7 +53,7 @@ def show_calibration_window(frame, samples):
 
 def remove_noise(mask):
   mask_filtered = mask
-  nlabels, labels, contours , centroids  = cv.connectedComponentsWithStats(mask)
+  nlabels, labels, contours , centroids = cv.connectedComponentsWithStats(mask)
   for label in range(1, nlabels):
     x,y,w,h,size = contours[label]
 
@@ -61,7 +62,18 @@ def remove_noise(mask):
 
   return mask_filtered
 
-def  find_contours(mask):
+def calculate_clustered_hulls(hulls, radius):
+  clustered_hulls = []
+  for hull in hulls:
+    points = np.array([[point.item(0), point.item(1)] for point in hull]) # converts hull to np array
+    clustering = DBSCAN(eps=radius, min_samples=1).fit(points)
+    clusters = [points[clustering.labels_ == i] for i in range(len(set(clustering.labels_)))]
+    clustered_hulls.append([np.mean(cluster, axis=0).astype(int) for cluster in clusters])
+
+  return clustered_hulls
+
+
+def calculate_contours(mask):
   img, contours, hierarchy = cv.findContours(mask, cv.RETR_TREE,cv.CHAIN_APPROX_SIMPLE)
   contours = sorted(contours, key = cv.contourArea, reverse = True) 
   contours = [contours[i] for i in range(len(contours)) if cv.contourArea(contours[i]) > 0.20 * cv.contourArea(contours[0])]
@@ -69,6 +81,7 @@ def  find_contours(mask):
   cv.drawContours(img, contours,-1,(0,255,0),1)
   
   hulls = [cv.convexHull(contour,False) for contour in contours]
+  clustered_hulls = calculate_clustered_hulls(hulls, 10)
   
 
   for i in range(len(contours)):
@@ -76,10 +89,9 @@ def  find_contours(mask):
     # draw ith convex hull object
     cv.drawContours(img, hulls, i, color, 3, 8)
 
-    for hull in hulls:
-      for point in hull:
-        cv.circle(img,(point.item(0), point.item(1)),10,(255,0,0),1)
-       
+  for hull in clustered_hulls:
+    for point in hull:
+      cv.circle(img,(point.item(0), point.item(1)),10,(0,255,0),1)
 
   cv.imshow('Image contours',img)
 
