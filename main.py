@@ -1,10 +1,16 @@
 import cv2 as cv
 import numpy as np
+import sys
 from sample_skin_color import draw_sample_rectangles, get_samples
 from calibrate_mask import create_calibrate_window, get_calibrate_values, show_calibration_window, calcute_mask
 from helpers import concatenate_frames
 
-cap = cv.VideoCapture(0)
+if len(sys.argv) > 1:
+  videoCaptureDevice = int(sys.argv[1])
+else:
+  videoCaptureDevice = 0
+
+cap = cv.VideoCapture(videoCaptureDevice)
 
 sampled = False
 calibrated = False
@@ -13,6 +19,7 @@ calibrate_window = False
 while(True):
   # Capture frame-by-frame
   _, frame = cap.read()
+  
   frame = cv.flip(frame, 1)
 
   frame = cv.resize(frame, (0, 0), None, .50, .50) # Resizes frane with a scale factor of 0.5
