@@ -14,8 +14,15 @@ def get_mask(frame, values):
   contours, img_contours = calculate_contours(mask)
   mask = fill_contours(contours,mask)
   hulls, clustered_hulls = get_convex_hull(contours,mask)
-
-  mask_with_contours = draw_contours(mask,contours, hulls, clustered_hulls)
+  
+  mask_with_contours = cv.cvtColor(mask,cv.COLOR_GRAY2BGR) 
+  mask_with_contours = draw_contours(frame,contours, hulls, clustered_hulls)
+  """
+  for contour in np.asarray(contours):
+    epsilon = 0.001*cv.arcLength(contour,True)
+    approx = cv.approxPolyDP(contour,epsilon,True)
+    cv.drawContours(mask_with_contours, [approx],-1,(0,0,0),3)  
+  """
   
   return mask_with_contours, mask
 
@@ -36,15 +43,14 @@ def fill_contours(contours,mask):
 
 def draw_contours(mask,contours, hulls, clustered_hulls):
   mask_with_contours = mask
-  mask_with_contours = cv.cvtColor(mask_with_contours,cv.COLOR_GRAY2BGR)
   cv.drawContours(mask_with_contours, contours,-1,(0,255,0),1) # green - color for contours 
 
   for i in range(len(contours)):
     color = (0, 0, 255) # red - color for convex hull
-    cv.drawContours(mask_with_contours, hulls, i, color, 3, 8)
+    cv.drawContours(mask_with_contours, hulls, i, color, 2, 8)
 
   for hull in clustered_hulls:
     for point in hull:
-      cv.circle(mask_with_contours,(point.item(0), point.item(1)),10,(0,255,0),1)
+      cv.circle(mask_with_contours,(point.item(0), point.item(1)),10,(255,0,0),2)
     
   return mask_with_contours
