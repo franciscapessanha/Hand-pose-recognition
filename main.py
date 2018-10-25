@@ -2,8 +2,10 @@ import cv2 as cv
 import numpy as np
 import sys
 from sample_skin_color import draw_sample_rectangles, get_samples
-from calibrate_mask import create_calibrate_window, get_calibrate_values, show_calibration_window, calcute_mask
+from calibrate_window import create_calibrate_window, get_calibrate_values, show_calibration_window
+from calculate_mask import get_mask
 from helpers import concatenate_frames
+
 
 if len(sys.argv) > 1:
   videoCaptureDevice = int(sys.argv[1])
@@ -48,10 +50,10 @@ while(True):
   elif calibrate_window:
     mask = show_calibration_window(frame, samples)
   else:
-    mask = calcute_mask(frame, calibrated_values)
-    mask = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
+    mask_with_contours, mask = get_mask(frame, calibrated_values)
+    #mask = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
     
-    frame = concatenate_frames(frame, mask)
+    frame = concatenate_frames(frame, mask_with_contours)
   
   cv.imshow('Project', frame)
 
