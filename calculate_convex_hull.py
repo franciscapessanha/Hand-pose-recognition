@@ -16,3 +16,14 @@ def calculate_clustered_hulls(hulls, radius): #alterar nome
     clusters = [points[clustering.labels_ == i] for i in range(len(set(clustering.labels_)))]
     clustered_hulls.append([np.mean(cluster, axis=0).astype(int) for cluster in clusters])
   return clustered_hulls
+
+def calculate_convexity_defects(contours, mask_with_contours):
+  for contour in contours:
+    hull = cv.convexHull(contour, returnPoints = False)
+    defects = cv.convexityDefects(contour, hull)
+    for i in range(defects.shape[0]):
+      _,_,f,_ = defects[i,0]
+      far = tuple(contour[f][0])
+      cv.circle(mask_with_contours,far,5,[0,0,255],-1)
+pass
+  

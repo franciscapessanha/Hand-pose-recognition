@@ -1,13 +1,12 @@
 import cv2 as cv
 import numpy as np
-from calculate_convex_hull import get_convex_hull
+from calculate_convex_hull import get_convex_hull, calculate_convexity_defects
 
 def get_mask(original, values):
   filtered_frame = cv.medianBlur(original, 5)
   hsv_frame = cv.cvtColor(filtered_frame, cv.COLOR_BGR2HSV)
   mask = cv.inRange(hsv_frame, *values)
 
-  #ALTERAR!!!!!
   mask = cv.medianBlur(mask, 11)
   
   contours, img_contours = calculate_contours(mask)
@@ -16,26 +15,8 @@ def get_mask(original, values):
   
   mask_with_contours = cv.cvtColor(mask,cv.COLOR_GRAY2BGR) 
   mask_with_contours = draw_contours(original,contours, hulls, clustered_hulls)
+  calculate_convexity_defects(contours, mask_with_contours)
 
-  for contour in contours:
-   '''  
-    epsilon = 0.005*cv.arcLength(contour,True)
-    approx = cv.approxPolyDP(contour,epsilon,True)
-   '''  
-   hull = cv.convexHull(contour, returnPoints = False)
-
-   defects = cv.convexityDefects(contour, hull)
-   for i in range(defects.shape[0]):
-    s,e,f,d = defects[i,0]
-    start = tuple(contour[s][0])
-    end = tuple(contour[e][0])
-    far = tuple(contour[f][0])
-    #cv.line(mask_with_contours,start,end,[0,255,0],2)
-    cv.circle(mask_with_contours,far,5,[0,0,255],-1)
-
-   #cv.drawContours(mask_with_contours, [approx],-1,(100,100,100),2)  
-  
-  
   return mask_with_contours, mask
 
 def calculate_contours(mask):
