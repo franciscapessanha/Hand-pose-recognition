@@ -14,5 +14,15 @@ def calculate_clustered_hulls(hulls, radius): #alterar nome
     points = np.array([[point.item(0), point.item(1)] for point in hull]) # converts hull to np array
     clustering = DBSCAN(eps=radius, min_samples=1).fit(points)
     clusters = [points[clustering.labels_ == i] for i in range(len(set(clustering.labels_)))]
-    clustered_hulls.append([np.mean(cluster, axis=0).astype(int) for cluster in clusters])
+    mean_point_cluster = []
+    for cluster in clusters:
+      best_point, min_dist = 0, 9999
+      mean_point = np.mean(cluster, axis=0).astype(int)
+      for point in cluster:
+        dist = np.linalg.norm(point-mean_point)
+        if dist < min_dist:
+          best_point = mean_point
+          min_dist = dist
+      mean_point_cluster.append(best_point)
+    clustered_hulls.append(mean_point_cluster)
   return clustered_hulls
