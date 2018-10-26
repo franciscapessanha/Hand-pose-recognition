@@ -27,12 +27,41 @@ def calculate_clustered_hulls(hulls, radius): #alterar nome
     clustered_hulls.append(mean_point_cluster)
   return clustered_hulls
 
-def calculate_convexity_defects(contours, mask_with_contours):
-  for contour in contours:
+def calculate_convexity_defects(contours, clustered_hulls, mask_with_contours, cluster_range):
+  contours_with_defects = []
+  for contour, clustered_hull in zip(contours, clustered_hulls):
+    contour_with_defects = []
     hull = cv.convexHull(contour, returnPoints = False)
     defects = cv.convexityDefects(contour, hull)
     for i in range(defects.shape[0]):
-      _,_,f,_ = defects[i,0]
-      far = tuple(contour[f][0])
-      cv.circle(mask_with_contours,far,5,[0,0,255],-1)
-pass
+      s,e,f,_ = defects[i,0]
+      start = contour[s][0]
+      end = contour[e][0]
+      defect_point = contour[f][0]
+      in_range, _ = get_point_in_range(defect_point, clustered_hull, cluster_range)
+      if not in_range:
+        start_in_range, start_in_hull = get_point_in_range(start, clustered_hull, cluster_range)
+        if not start_in_range:
+          start_in_hull = start
+
+        end_in_range, end_in_hull = get_point_in_range(end, clustered_hull, cluster_range)
+        if not end_in_range:
+          end_in_hull = end
+
+        contour_with_defects.append([np.array(start_in_hull).flatten(), np.array(defect_point).flatten(), np.array(end_in_hull).flatten()])
+        cv.circle(mask_with_contours,tuple(defect_point),5,[0,0,255],-1)
+
+    contours_with_defects.append(contour_with_defects)
+
+    return contours_with_defects
+
+def get_point_in_range(point, hull, cluster_range):
+  in_range = False
+  closest_hull_point = None
+  for hull_point in hull:
+    if np.linalg.norm(hull_point-point) < cluster_range:
+      in_range = True
+      closest_hull_point = hull_point
+      break
+
+  return in_range, closest_hull_point

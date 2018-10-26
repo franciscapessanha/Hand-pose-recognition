@@ -15,7 +15,7 @@ def get_mask(original, values):
   
   mask_with_contours = cv.cvtColor(mask,cv.COLOR_GRAY2BGR) 
   mask_with_contours = draw_contours(original,contours, hulls, clustered_hulls)
-  calculate_convexity_defects(contours, mask_with_contours)
+  calculate_convexity_defects(contours, hulls, mask_with_contours, 10)
 
   return mask_with_contours, mask
 
