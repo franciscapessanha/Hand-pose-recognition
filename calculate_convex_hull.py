@@ -49,11 +49,10 @@ def calculate_convexity_defects(contours, clustered_hulls, cluster_range):
           end_in_hull = end
 
         contour_with_defects.append([np.array(start_in_hull).flatten(), np.array(defect_point).flatten(), np.array(end_in_hull).flatten()])
-        
 
     contours_with_defects.append(contour_with_defects)
 
-    return contours_with_defects
+  return contours_with_defects
 
 def get_point_in_range(point, hull, cluster_range):
   in_range = False
