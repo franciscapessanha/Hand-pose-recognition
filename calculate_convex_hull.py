@@ -27,7 +27,7 @@ def calculate_clustered_hulls(hulls, radius): #alterar nome
     clustered_hulls.append(mean_point_cluster)
   return clustered_hulls
 
-def calculate_convexity_defects(contours, clustered_hulls, mask_with_contours, cluster_range):
+def calculate_convexity_defects(contours, clustered_hulls, cluster_range):
   contours_with_defects = []
   for contour, clustered_hull in zip(contours, clustered_hulls):
     contour_with_defects = []
@@ -49,7 +49,7 @@ def calculate_convexity_defects(contours, clustered_hulls, mask_with_contours, c
           end_in_hull = end
 
         contour_with_defects.append([np.array(start_in_hull).flatten(), np.array(defect_point).flatten(), np.array(end_in_hull).flatten()])
-        cv.circle(mask_with_contours,tuple(defect_point),5,[0,0,255],-1)
+        
 
     contours_with_defects.append(contour_with_defects)
 

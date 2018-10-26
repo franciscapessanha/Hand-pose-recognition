@@ -14,8 +14,8 @@ def get_mask(original, values):
   hulls, clustered_hulls = get_convex_hull(contours, mask)
   
   mask_with_contours = cv.cvtColor(mask,cv.COLOR_GRAY2BGR) 
-  mask_with_contours = draw_contours(original,contours, hulls, clustered_hulls)
-  calculate_convexity_defects(contours, hulls, mask_with_contours, 10)
+  contours_with_defects = calculate_convexity_defects(contours, hulls, 10)
+  mask_with_contours = draw_contours(original,contours, hulls, clustered_hulls, contours_with_defects)
 
   return mask_with_contours, mask
 
@@ -34,7 +34,7 @@ def fill_contours(contours,mask):
 
   return mask
 
-def draw_contours(mask,contours, hulls, clustered_hulls):
+def draw_contours(mask,contours, hulls, clustered_hulls, contours_with_defects):
   mask_with_contours = mask.copy()
   cv.drawContours(mask_with_contours, contours,-1,(0,255,0),2) # green - color for contours 
 
@@ -45,5 +45,8 @@ def draw_contours(mask,contours, hulls, clustered_hulls):
   for hull in clustered_hulls:
     for point in hull:
       cv.circle(mask_with_contours,(point.item(0), point.item(1)),10,(255,0,0),2)
-    
+
+  for contour_with_defects in contours_with_defects:
+    for triple in contour_with_defects:
+      cv.circle(mask_with_contours,tuple(triple[1]),5,[0,0,255],-1)
   return mask_with_contours
