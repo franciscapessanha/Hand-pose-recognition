@@ -4,22 +4,20 @@ from calculate_convex_hull import get_convex_hull, calculate_convexity_defects
 
 def get_mask(original, values):
   #hsv_frame = cv.cvtColor(filtered_frame, cv.COLOR_BGR2HSV)
-  adjusted_image = adjust_gamma(original, gamma = 1.5) #reduzir as sombras - torna tudo mais homogeneo
+  adjusted_image = adjust_gamma(original, gamma = 2) #reduzir as sombras - torna tudo mais homogeneo
   cv.imshow('after imadjust', adjusted_image)
-  filtered_frame = cv.medianBlur(original,9)
+  filtered_frame = cv.medianBlur(adjusted_image,9)
   
   hsv_frame = cv.cvtColor( filtered_frame, cv.COLOR_BGR2HSV)
   mask = cv.inRange(hsv_frame, *values)
  
   mask, border_size = add_border(mask)
   
-  kernel_ellipse = cv.getStructuringElement(cv.MORPH_ELLIPSE, (11,11))
+  kernel_ellipse = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5,5))
 
-  #dilated_mask = cv.dilate(mask,kernel_ellipse, iterations = 5)
   close_mask = cv.morphologyEx(mask,cv.MORPH_CLOSE, kernel_ellipse)
   close_mask = cv.medianBlur(mask,3)
 
-  cv.imshow("image with border", close_mask)
   close_mask = close_mask[border_size:-(border_size+1),border_size:-(border_size+1)]
 
   kernel_ellipse = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5,5))
@@ -27,23 +25,17 @@ def get_mask(original, values):
   erode_mask = cv.erode(dilated_mask, kernel_ellipse)
   mask = cv.medianBlur(erode_mask, 3)
 
-  cv.imshow('final mask', mask)
   #kernel_ellipse = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5,5))
   #filtered_frame = cv.morphologyEx(mask,cv.MORPH_CLOSE,kernel_ellipse)
   
   contours, img_contours = calculate_contours(mask)
   mask = fill_contours(contours,mask)
 
-  cv.imshow('after fill', mask)
+  hulls, clustered_hulls = get_convex_hull(contours, mask)
+  mask_with_contours = cv.cvtColor(mask,cv.COLOR_GRAY2BGR) 
+  contours_with_defects = calculate_convexity_defects(contours, hulls, 10)
+  mask_with_contours = draw_contours(original,contours, hulls, clustered_hulls, contours_with_defects)
 
-  #hulls, clustered_hulls = get_convex_hull(contours, mask)
-
-
-  #mask_with_contours = cv.cvtColor(mask,cv.COLOR_GRAY2BGR) 
-  #contours_with_defects = calculate_convexity_defects(contours, hulls, 10)
-  #mask_with_contours = draw_contours(original,contours, hulls, clustered_hulls, contours_with_defects)
-
-  mask_with_contours = mask
   return mask_with_contours, mask
 
 def adjust_gamma(image, gamma=1.0):

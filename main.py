@@ -52,7 +52,7 @@ while(True):
     mask_with_contours, mask = get_mask(frame, calibrated_values)
     #mask = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
     
-    #frame = concatenate_frames(frame, mask_with_contours)
+    frame = concatenate_frames(frame, mask_with_contours)
   
   cv.imshow('Project', frame)
 
