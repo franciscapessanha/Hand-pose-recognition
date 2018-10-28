@@ -36,8 +36,10 @@ def get_samples(frame):
   return [rect1, rect2]
 
 def calculate_sample_values(sample1, sample2, offset_hue, offset_sat_low, offset_sat_high):
-  hue1, sat1, _ = cv.split(sample1)
-  hue2, sat2, _ = cv.split(sample2)
+  hue1, sat1, value1 = cv.split(sample1)
+  hue2, sat2, value2 = cv.split(sample2)
+
+  offset_val = 0.50 #alterar
 
   min_val1, max_val1, min_loc1, max_loc1 = cv.minMaxLoc(hue1)
   min_val2, max_val2, min_loc2, max_loc2 = cv.minMaxLoc(hue2)
@@ -52,16 +54,27 @@ def calculate_sample_values(sample1, sample2, offset_hue, offset_sat_low, offset
   
   if min_val1 <= min_val2:
     sat_low_thresh = (1 - offset_sat_low) * sat1[min_loc1]
+    value_low_thresh = (1- offset_val)* value1[min_loc1]
   else: 
     sat_low_thresh = (1 - offset_sat_low) * sat2[min_loc2]
+    value_low_thresh = (1 - offset_val)* value2[min_loc2]
   if sat_low_thresh < 0:
     sat_low_thresh = 0
 
   if max_val1 >= max_val2:
     sat_high_thresh = (1 + offset_sat_high) * sat1[max_loc1]
+    value_high_thresh = (1 + offset_val)* value1[min_loc1]
   else:
     sat_high_thresh = (1 + offset_sat_high) * sat2[max_loc2]
+    value_high_thresh = (1 + offset_val)* value2[min_loc2]
   if sat_high_thresh > 255:
     sat_high_thresh = 255
 
+  print(hue_low_thresh)
+  print(hue_high_thresh)
+
+  print(sat_low_thresh)
+  print(sat_high_thresh)
+
+  #return [(hue_low_thresh, sat_low_thresh, value_low_thresh), (hue_high_thresh, sat_high_thresh, value_high_thresh)]
   return [(hue_low_thresh, sat_low_thresh, 0), (hue_high_thresh, sat_high_thresh, 255)]

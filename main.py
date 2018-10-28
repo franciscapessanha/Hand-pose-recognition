@@ -12,7 +12,7 @@ if len(sys.argv) > 1:
 else:
   videoCaptureDevice = 0
 
-cap = cv.VideoCapture(videoCaptureDevice)
+cap = cv.VideoCapture('hand.mp4')
 
 sampled = False
 calibrated = False
@@ -23,10 +23,9 @@ while(True):
   _, frame = cap.read()
   
   frame = cv.flip(frame, 1)
+  frame = cv.resize(frame, (640,360)) #this way every video will have the same dimension - and so the kernels will be right!
 
-  frame = cv.resize(frame, (0, 0), None, .50, .50) # Resizes frane with a scale factor of 0.5
-
-  key = cv.waitKey(1) # Waits for user key press
+  key = cv.waitKey(35) # Waits for user key press ~ 32 frames/s
 
   if key == 27: # Esc to quit
     break
@@ -53,7 +52,7 @@ while(True):
     mask_with_contours, mask = get_mask(frame, calibrated_values)
     #mask = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
     
-    frame = concatenate_frames(frame, mask_with_contours)
+    #frame = concatenate_frames(frame, mask_with_contours)
   
   cv.imshow('Project', frame)
 
