@@ -79,6 +79,8 @@ def label_video(video_capture_source):
   while(True):
     # Capture frame-by-frame
     _, frame = cap.read()
+    if frame is None:
+      break
 
     frame = format_frame(frame, video_capture_source)
 
