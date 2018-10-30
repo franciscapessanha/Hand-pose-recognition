@@ -82,8 +82,10 @@ def label_video(video_capture_source):
   while(True):
     # Capture frame-by-frame
     _, frame = cap.read()
-    frame = format_frame(frame)
-    if not handle_key(cv.waitKey(35), frame): 
+    frame = format_frame(frame, video_capture_source)
+    if not handle_key(cv.waitKey(frame_rate), frame):
+      break
+ 
     if frame is None:
       break
 

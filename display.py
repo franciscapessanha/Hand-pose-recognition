@@ -31,7 +31,7 @@ def get_mask_thresholds(sample):
   return calculate_mask_thresholds(sample, hue_offset/100, sat_offset_low/100, sat_offset_high/100)
 
 def open_calibration_window(frame, sample):
-  _, mask = get_mask(frame, get_mask_thresholds(sample))
+  mask = get_mask(frame, get_mask_thresholds(sample))
   cv.imshow(calibrate_window_title, mask)
 
 def open_selector_window(frame):
