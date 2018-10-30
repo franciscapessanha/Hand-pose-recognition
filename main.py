@@ -68,6 +68,7 @@ def handle_display(frame):
     cv.imshow(title + ' - Press ENTER to sample', frame)
   elif state == 'labeling':
     mask_with_contours, _ = get_mask(frame, threshold)
+    add_string_frame(mask_with_contours, 'texto')
     cv.imshow(title, mask_with_contours)
   elif state == 'calibrating':
     open_calibration_window(frame, sample)
