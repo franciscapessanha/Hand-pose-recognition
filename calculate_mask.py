@@ -19,13 +19,13 @@ def filter_mask(mask):
   kernel_ellipse = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5,5))
   
   mask = cv.morphologyEx(mask,cv.MORPH_CLOSE, kernel_ellipse)
-  mask = cv.medianBlur(mask,3)
+  mask = cv.medianBlur(mask,5)
   mask = mask[border_size:-(border_size+1),border_size:-(border_size+1)] #remove border
 
   kernel_ellipse = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5,5))
   mask = cv.dilate(mask,kernel_ellipse, iterations = 2)
   mask = cv.erode(mask, kernel_ellipse)
-  mask = cv.medianBlur(mask, 3)
+  mask = cv.medianBlur(mask, 5)
 
 def adjust_gamma(image, gamma=1.0):
   invGamma = 1.0 / gamma

@@ -69,8 +69,8 @@ def handle_display(frame):
     cv.imshow(title + ' - Press ENTER to sample', frame)
   elif state == 'labeling':
     mask = get_mask(frame,threshold)
-    frame_copy = get_fingers(mask,frame)
-    add_string_frame(frame_copy, 'texto')
+    frame_copy, count_fingers  = get_fingers(mask,frame)
+    add_string_frame(frame_copy, str(count_fingers))
     cv.imshow(title, frame_copy)
   elif state == 'calibrating':
     open_calibration_window(frame, sample)

@@ -13,20 +13,21 @@ def get_fingers(mask,original_frame):
   draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices,contours)
   
   contours_with_defects = calculate_convexity_defects(contours,clustered_hulls_vertices, cluster_range=10)
-  draw_defects(frame_copy,contours_with_defects)
+  count_fingers = draw_defects(frame_copy,contours_with_defects)
+  return frame_copy, count_fingers 
 
-  return frame_copy
-
-def draw_defects(frame_copy, contours_with_defects):
+def draw_defects(frame_copy, contours_with_defects): #alterar - retirar count_fingers
   count_fingers = 0
   for contour_with_defects in contours_with_defects:
     for i in range(0,len(contour_with_defects)):
       triple1 = contour_with_defects[i]
       triple2 = contour_with_defects[i-1]
       new_triple = [triple2[1], triple1[0], triple1[1]]
-      if filter_vertices_by_angle(new_triple, 45):
+      if filter_vertices_by_angle(new_triple, 60):
         cv.circle(frame_copy,tuple(new_triple[1]),10,[0,0,255],3)
-        count_fingers+= count_fingers
+        count_fingers= count_fingers+1
+        print(count_fingers)
+  return count_fingers
 
 
 def filter_vertices_by_angle(triple,max_angle):
