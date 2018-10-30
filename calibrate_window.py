@@ -28,8 +28,8 @@ def create_calibrate_window():
   cv.createTrackbar("Sat Offset High", "Calibrate", sat_offset_high, 100, set_sat_offset_high)
   cv.createTrackbar("Sat Offset Low", "Calibrate", sat_offset_low, 100, set_sat_offset_low)
 
-def get_calibrate_values(samples):
-  return calculate_sample_values(*samples, hue_offset/100, sat_offset_low/100, sat_offset_high/100)
+def get_calibrate_values(sample):
+  return calculate_sample_values(sample, hue_offset/100, sat_offset_low/100, sat_offset_high/100)
 
 def show_calibration_window(frame, samples):
   mask_with_contours, mask = get_mask(frame, get_calibrate_values(samples))

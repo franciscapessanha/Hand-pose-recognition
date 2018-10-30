@@ -33,6 +33,8 @@ def calculate_convexity_defects(contours, clustered_hulls, cluster_range):
     contour_with_defects = []
     hull = cv.convexHull(contour, returnPoints = False)
     defects = cv.convexityDefects(contour, hull)
+    if defects is None:
+      continue
     for i in range(defects.shape[0]):
       s,e,f,_ = defects[i,0]
       start = contour[s][0]
