@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 from calculate_convex_hull import get_convex_hull, calculate_convexity_defects
+from numpy import linalg
 
 def get_mask(original, values):
   #hsv_frame = cv.cvtColor(filtered_frame, cv.COLOR_BGR2HSV)
@@ -34,6 +35,7 @@ def get_mask(original, values):
   hulls, clustered_hulls = get_convex_hull(contours, mask)
   mask_with_contours = cv.cvtColor(mask,cv.COLOR_GRAY2BGR) 
   contours_with_defects = calculate_convexity_defects(contours, hulls, 10)
+
   mask_with_contours = draw_contours(original,contours, hulls, clustered_hulls, contours_with_defects)
 
   return mask_with_contours, mask
@@ -69,16 +71,43 @@ def fill_contours(contours,mask):
 def draw_contours(mask,contours, hulls, clustered_hulls, contours_with_defects):
   mask_with_contours = mask.copy()
   cv.drawContours(mask_with_contours, contours,-1,(0,255,0),2) # green - color for contours 
-
+  '''
   for i in range(len(contours)):
     color = (0, 0, 255) # red - color for convex hull
     cv.drawContours(mask_with_contours, hulls, i, color, 2, 8)
-
+  
   for hull in clustered_hulls:
     for point in hull:
       cv.circle(mask_with_contours,(point.item(0), point.item(1)),10,(255,0,0),2)
-
+  '''
+  count_fingers = 0
   for contour_with_defects in contours_with_defects:
-    for triple in contour_with_defects:
-      cv.circle(mask_with_contours,tuple(triple[1]),5,[0,0,255],-1)
+    for i in range(0,len(contour_with_defects)):
+  
+      triple1 = contour_with_defects[i]
+      triple2 = contour_with_defects[i-1]
+
+      new_triple = [triple2[1], triple1[0], triple1[1]]
+  
+      if filter_vertices_angle(new_triple, 45):
+        #cv.circle(mask_with_contours,tuple(new_triple[2]),8,[0,0,255],3)
+        #cv.circle(mask_with_contours,tuple(new_triple[0]),8,[0,255,0],3)
+        cv.circle(mask_with_contours,tuple(new_triple[1]),10,[255,0,0],2)
+        count_fingers+= count_fingers
+      #cv.line(mask_with_contours,tuple(triple[0]),tuple(triple[1]),[0,255,0],3)
+      #cv.line(mask_with_contours,tuple(triple[1]),tuple(triple[2]),[255,0,0],3)
+    #else: del contour_with_defects[triple]
+      
   return mask_with_contours
+
+def filter_vertices_angle(triple,max_angle):
+  print(triple)
+  a = linalg.norm(triple[0]-triple[2])
+  b = linalg.norm(triple[1]-triple[2])
+  c = linalg.norm(triple[1]-triple[0])
+
+  angle = np.arccos(((b**2 + c**2 - a**2) /(2 * b * c))) * (180 / np.pi)
+  print(angle)
+  if angle < max_angle:
+    return True
+  return False

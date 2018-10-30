@@ -36,5 +36,3 @@ def show_calibration_window(frame, samples):
   cv.imshow('Calibrate', mask)
 
   return cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
-
-
