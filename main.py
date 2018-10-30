@@ -3,6 +3,7 @@ import numpy as np
 import sys
 from calculate_mask import get_mask
 from display import *
+from calculate_fingers import get_fingers
 
 title = 'Hand Labeling v0.1'
 state = 'start'
@@ -53,8 +54,10 @@ def handle_display(frame):
   if state == 'start':
     cv.imshow(title + ' - Press ENTER to sample', frame)
   elif state == 'labeling':
-    mask_with_contours, _ = get_mask(frame, threshold)
-    cv.imshow(title, mask_with_contours)
+    mask = get_mask(frame,threshold)
+    frame_copy = get_fingers(mask,frame)
+
+    cv.imshow(title, frame_copy) #VAMOS CHAMAR A IMAGEM DO CALCULATE FINGERS!!!
   elif state == 'calibrating':
     open_calibration_window(frame, sample)
 
@@ -69,12 +72,9 @@ def main():
   while(True):
     # Capture frame-by-frame
     _, frame = cap.read()
-
     frame = format_frame(frame)
-
     if not handle_key(cv.waitKey(35), frame): 
       break
-
     handle_display(frame)
 
   # When everything done, release the capture
