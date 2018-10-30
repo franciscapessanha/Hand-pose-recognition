@@ -36,6 +36,8 @@ def get_samples(frame):
   return [rect1, rect2]
 
 def calculate_sample_values(sample, offset_hue, offset_sat_low, offset_sat_high):
+  sample = cv.cvtColor(sample, cv.COLOR_BGR2HSV)
+  sample = cv.medianBlur(sample, 5)
   hue, sat, value = cv.split(sample)
 
   offset_val = 0.50 # alterar
