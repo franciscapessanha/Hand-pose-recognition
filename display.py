@@ -39,3 +39,9 @@ def open_selector_window(frame):
   sample = frame[int(r[1]):int(r[1]+r[3]), int(r[0]):int(r[0]+r[2])]
   cv.destroyWindow('ROI selector')
   return sample, get_mask_thresholds(sample)
+
+def add_string_frame(frame, string):
+  bottom_point = (5, frame.shape[0] - 5)
+  text_size = cv.getTextSize(string, cv.FONT_HERSHEY_SIMPLEX, 1.5, 2)
+  cv.rectangle(frame, (0, frame.shape[0]), (bottom_point[0] + text_size[0][0] + 5, bottom_point[1] - text_size[0][1] - 5), (255,255,255), -1 )
+  cv.putText(frame, string, bottom_point, cv.FONT_HERSHEY_SIMPLEX, 1.5, (0,0,0), 2)

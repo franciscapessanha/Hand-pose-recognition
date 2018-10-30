@@ -1,19 +1,32 @@
 import cv2 as cv
-import numpy as np
 import sys
+import numpy as np
 from calculate_mask import get_mask
 from display import *
 from calculate_fingers import get_fingers
+from helpers import is_int
 
 title = 'Hand Labeling v0.1'
 state = 'start'
 sample = None
 threshold = None
 
-def format_frame(frame):
-  frame = cv.flip(frame, 1)
+def get_frame_rate(video_capture_source, video_capture):
+  if type(video_capture_source) == int:
+    return 1
+  else:
+    return int(video_capture.get(cv.CAP_PROP_FPS))
+
+def format_frame(frame, video_capture_source):
+  if type(video_capture_source) == int: # Video Capture Device is a web camera
+    frame = cv.flip(frame, 1)
+
   frame = cv.resize(frame, (640,360)) #this way every video will have the same dimension - and so the kernels will be right!
   return frame
+
+def format_image(image):
+  return cv.resize(image, (640,360)) #this way every video will have the same dimension - and so the kernels will be right!
+
 
 def enter_pressed(frame):
   global state, threshold, sample
@@ -28,6 +41,7 @@ def enter_pressed(frame):
 def s_key_pressed(frame):
   global state, threshold, sample
   if state == 'labeling':
+    cv.destroyWindow(title)
     sample, threshold = open_selector_window(frame)
 
 def c_key_pressed():
@@ -56,24 +70,26 @@ def handle_display(frame):
   elif state == 'labeling':
     mask = get_mask(frame,threshold)
     frame_copy = get_fingers(mask,frame)
-
-    cv.imshow(title, frame_copy) #VAMOS CHAMAR A IMAGEM DO CALCULATE FINGERS!!!
+    add_string_frame(frame_copy, 'texto')
+    cv.imshow(title, frame_copy)
   elif state == 'calibrating':
     open_calibration_window(frame, sample)
 
-def main():
-  if len(sys.argv) > 1:
-    videoCaptureDevice = int(sys.argv[1])
-  else:
-    videoCaptureDevice = 0
-
-  cap = cv.VideoCapture('hand.mp4')
+def label_video(video_capture_source):
+  cap = cv.VideoCapture(video_capture_source)
+  frame_rate = get_frame_rate(video_capture_source, cap)
 
   while(True):
     # Capture frame-by-frame
     _, frame = cap.read()
     frame = format_frame(frame)
     if not handle_key(cv.waitKey(35), frame): 
+    if frame is None:
+      break
+
+    frame = format_frame(frame, video_capture_source)
+
+    if not handle_key(cv.waitKey(frame_rate), frame): 
       break
     handle_display(frame)
 
@@ -81,5 +97,27 @@ def main():
   cap.release()
   cv.destroyAllWindows()
 
+def label_image(image_source):
+  while(True):
+    image = cv.imread(image_source)
+    image = format_image(image)
+
+    if not handle_key(cv.waitKey(1), image): 
+      break
+
+    handle_display(image)
+
+def handle_arguments():
+  if len(sys.argv) == 1:
+    label_video(0)
+  elif len(sys.argv) == 2:
+    if is_int(sys.argv[1]):
+      label_video(int(sys.argv[1]))
+    else:
+      if sys.argv[1].endswith('.mp4'):
+        label_video(sys.argv[1])
+      elif sys.argv[1].endswith('.jpg') or sys.argv[1].endswith('.png'):
+        label_image(sys.argv[1])
+
 if __name__ == "__main__":
-  main()
+  handle_arguments()

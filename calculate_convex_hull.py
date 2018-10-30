@@ -45,7 +45,8 @@ def calculate_convexity_defects(contours, clustered_hulls_vertices, cluster_rang
     if defects is None:
       continue
     for i in range(defects.shape[0]):
-      s,e,f,_ = defects[i,0]
+      s,e,f,d = defects[i,0]
+      #if d> 30 #elimina valores muito proximos do cluster hull
 
       start = contour[s][0]
       end = contour[e][0]
