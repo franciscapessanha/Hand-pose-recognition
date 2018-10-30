@@ -1,41 +1,6 @@
 import cv2 as cv
-import numpy as np
 
-
-rectangle_size = 20
-
-def draw_sample_rectangles(frame):
-  height, width, _ = frame.shape
-
-  rect1_top = (int(width/2 - rectangle_size/2), int(height*(1/3) - rectangle_size/2))
-  rect2_top = (int(width/2 - rectangle_size/2), int(height*(2/3) - rectangle_size/2))
-
-  cv.rectangle(frame,
-    rect1_top,
-    (rect1_top[0] + rectangle_size, rect1_top[1] + rectangle_size),
-    (0,255,0),
-    1)
-
-  cv.rectangle(frame,
-    rect2_top, 
-    (rect2_top[0] + rectangle_size, rect2_top[1] + rectangle_size), 
-    (0,255,0),
-    1)
-
-def get_samples(frame):
-  height, width, _ = frame.shape
-
-  hsv_frame = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
-  hsv_frame = cv.medianBlur(hsv_frame,5)
-
-  rect1_top = (int(width/2 - rectangle_size/2), int(height*(1/3) - rectangle_size/2))
-  rect2_top = (int(width/2 - rectangle_size/2), int(height*(2/3) - rectangle_size/2))
-  rect1 = hsv_frame[rect1_top[1]:rect1_top[1]+rectangle_size, rect1_top[0]:rect1_top[0]+rectangle_size]
-  rect2 = hsv_frame[rect2_top[1]:rect2_top[1]+rectangle_size, rect2_top[0]:rect2_top[0]+rectangle_size]
-
-  return [rect1, rect2]
-
-def calculate_sample_values(sample, offset_hue, offset_sat_low, offset_sat_high):
+def calculate_mask_thresholds(sample, offset_hue, offset_sat_low, offset_sat_high):
   sample = cv.cvtColor(sample, cv.COLOR_BGR2HSV)
   sample = cv.medianBlur(sample, 5)
   hue, sat, value = cv.split(sample)
@@ -62,11 +27,5 @@ def calculate_sample_values(sample, offset_hue, offset_sat_low, offset_sat_high)
   if sat_high_thresh > 255:
     sat_high_thresh = 255
 
-  print(hue_low_thresh)
-  print(hue_high_thresh)
-
-  print(sat_low_thresh)
-  print(sat_high_thresh)
-
-  #return [(hue_low_thresh, sat_low_thresh, value_low_thresh), (hue_high_thresh, sat_high_thresh, value_high_thresh)]
-  return [(hue_low_thresh, sat_low_thresh, 0), (hue_high_thresh, sat_high_thresh, 255)]
+  return [(hue_low_thresh, sat_low_thresh, value_low_thresh), (hue_high_thresh, sat_high_thresh, value_high_thresh)]
+  #return [(hue_low_thresh, sat_low_thresh, 0), (hue_high_thresh, sat_high_thresh, 255)]

@@ -5,7 +5,6 @@ from calculate_convex_hull import get_convex_hull, calculate_convexity_defects
 def get_mask(original, values):
   #hsv_frame = cv.cvtColor(filtered_frame, cv.COLOR_BGR2HSV)
   adjusted_image = adjust_gamma(original, gamma = 1.5) # reduzir as sombras - torna tudo mais homogeneo
-  cv.imshow('after imadjust', adjusted_image)
   filtered_frame = cv.medianBlur(adjusted_image,9)
   
   hsv_frame = cv.cvtColor( filtered_frame, cv.COLOR_BGR2HSV)

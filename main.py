@@ -1,22 +1,62 @@
 import cv2 as cv
 import numpy as np
 import sys
-from sample_skin_color import draw_sample_rectangles, get_samples
-from calibrate_window import create_calibrate_window, get_calibrate_values, show_calibration_window
 from calculate_mask import get_mask
-from helpers import concatenate_frames
+from display import *
 
+title = 'Hand Labeling v0.1'
 state = 'start'
+sample = None
+threshold = None
 
 def format_frame(frame):
   frame = cv.flip(frame, 1)
   frame = cv.resize(frame, (640,360)) #this way every video will have the same dimension - and so the kernels will be right!
   return frame
 
-def enter_pressed():
+def enter_pressed(frame):
+  global state, threshold, sample
   if state == 'start':
-    return
-  return
+    cv.destroyWindow(title + ' - Press ENTER to sample')
+    sample, threshold = open_selector_window(frame)
+    state = 'labeling'
+  elif state == 'calibrating':
+    cv.destroyWindow(calibrate_window_title)
+    state = 'labeling'
+
+def s_key_pressed(frame):
+  global state, threshold, sample
+  if state == 'labeling':
+    sample, threshold = open_selector_window(frame)
+
+def c_key_pressed():
+  global state
+  if state == 'labeling':
+    cv.destroyWindow(title)
+    create_calibration_window()
+    state = 'calibrating'
+
+def handle_key(key, frame):
+  if key == 27: # Esc key pressed
+    return False
+  elif key == 13: # Enter key pressed
+    enter_pressed(frame)
+  elif key == 99: # C key pressed
+    c_key_pressed()
+  elif key == 115: # S key pressed
+    s_key_pressed(frame)
+
+  return True
+
+def handle_display(frame):
+  global state
+  if state == 'start':
+    cv.imshow(title + ' - Press ENTER to sample', frame)
+  elif state == 'labeling':
+    mask_with_contours, _ = get_mask(frame, threshold)
+    cv.imshow(title, mask_with_contours)
+  elif state == 'calibrating':
+    open_calibration_window(frame, sample)
 
 def main():
   if len(sys.argv) > 1:
@@ -26,49 +66,16 @@ def main():
 
   cap = cv.VideoCapture('hand.mp4')
 
-  sampled = False
-  calibrated = False
-  calibrate_window = False
-
   while(True):
     # Capture frame-by-frame
     _, frame = cap.read()
 
     frame = format_frame(frame)
 
-    key = cv.waitKey(35) # Waits for user key press ~ 32 frames/s
-
-    if key == 27: # Esc to quit
+    if not handle_key(cv.waitKey(35), frame): 
       break
-    elif key == 13:
-      if not sampled:
-        #samples = get_samples(frame)
-        r = cv.selectROI(frame)
-        sample = frame[int(r[1]):int(r[1]+r[3]), int(r[0]):int(r[0]+r[2])]
-        cv.imshow('sample', sample)
-        sampled = True
 
-      if calibrate_window:
-        cv.destroyWindow("Calibrate")
-        calibrate_window = False
-
-      calibrated_values = get_calibrate_values(sample)
-      calibrated = True
-    elif key == 99 and sampled: # c to calibrate
-      create_calibrate_window()
-      calibrate_window = True
-
-    if not sampled:
-      draw_sample_rectangles(frame)
-    elif calibrate_window:
-      mask = show_calibration_window(frame, samples)
-    else:
-      mask_with_contours, mask = get_mask(frame, calibrated_values)
-      #mask = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
-      
-      frame = concatenate_frames(frame, mask_with_contours)
-    
-    cv.imshow('Project', frame)
+    handle_display(frame)
 
   # When everything done, release the capture
   cap.release()
