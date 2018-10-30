@@ -6,7 +6,6 @@ from numpy import linalg
 def get_mask(original, values):
   #hsv_frame = cv.cvtColor(filtered_frame, cv.COLOR_BGR2HSV)
   adjusted_image = adjust_gamma(original, gamma = 1.5) # reduzir as sombras - torna tudo mais homogeneo
-  cv.imshow('after imadjust', adjusted_image)
   filtered_frame = cv.medianBlur(adjusted_image,9)
   
   hsv_frame = cv.cvtColor( filtered_frame, cv.COLOR_BGR2HSV)
@@ -39,6 +38,7 @@ def get_mask(original, values):
   mask_with_contours = draw_contours(original,contours, hulls, clustered_hulls, contours_with_defects)
 
   return mask_with_contours, mask
+
 
 def adjust_gamma(image, gamma=1.0):
   invGamma = 1.0 / gamma
@@ -101,13 +101,13 @@ def draw_contours(mask,contours, hulls, clustered_hulls, contours_with_defects):
   return mask_with_contours
 
 def filter_vertices_angle(triple,max_angle):
-  print(triple)
+
   a = linalg.norm(triple[0]-triple[2])
   b = linalg.norm(triple[1]-triple[2])
   c = linalg.norm(triple[1]-triple[0])
 
   angle = np.arccos(((b**2 + c**2 - a**2) /(2 * b * c))) * (180 / np.pi)
-  print(angle)
+
   if angle < max_angle:
     return True
   return False
