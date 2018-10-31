@@ -116,11 +116,17 @@ def label_video(video_capture_source):
   cv.destroyAllWindows()
 
 def label_image(image_source):
+  global state
   while(True):
     image = cv.imread(image_source)
     image = format_image(image)
 
-    if not handle_key(cv.waitKey(1), image): 
+    if state == 'calibrating':
+      running = 1
+    else:
+      running = 0
+
+    if not handle_key(cv.waitKey(running), image): 
       break
 
     handle_display(image)
