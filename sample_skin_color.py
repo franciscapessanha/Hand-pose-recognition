@@ -27,5 +27,5 @@ def calculate_mask_thresholds(sample, offset_hue, offset_sat_low, offset_sat_hig
   if sat_high_thresh > 255:
     sat_high_thresh = 255
 
-  return [(hue_low_thresh, sat_low_thresh, value_low_thresh), (hue_high_thresh, sat_high_thresh, value_high_thresh)]
-  #return [(hue_low_thresh, sat_low_thresh, 0), (hue_high_thresh, sat_high_thresh, 255)]
+  #return [(hue_low_thresh, sat_low_thresh, value_low_thresh), (hue_high_thresh, sat_high_thresh, value_high_thresh)]
+  return [(hue_low_thresh, sat_low_thresh, 0), (hue_high_thresh, sat_high_thresh, 255)]

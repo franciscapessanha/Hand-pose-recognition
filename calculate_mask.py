@@ -1,38 +1,27 @@
 import cv2 as cv
 import numpy as np
-from calculate_contours import get_contours, fill_contours, draw_contours
 
-def get_mask(original_frame, values): #shadow removal: devem ser regiões com uma hue and sat proxima mas uma intensidsde muito mais baixa (HSI) - tentava fazer a correção na intensidade. uniformizar intensidade 
-  hsv_frame = cv.cvtColor( original_frame, cv.COLOR_BGR2HSV)
-  filtered_frame = filter_frame(hsv_frame, original_frame)
+def get_mask(original_frame, values):
+  filtered_frame = filter_frame(original_frame)
+  hsv_frame = cv.cvtColor( filtered_frame, cv.COLOR_BGR2HSV)
   mask = cv.inRange(hsv_frame, *values)
+  mask = get_vertical_projection(mask)
   mask = filter_mask(mask)
   cv.imshow("final mask", mask)
   return mask
 
-def filter_frame(hsv_frame, original_frame):
-  #adjusted_frame = adjust_gamma(original_frame, gamma = 1.5) # reduzir as sombras - torna tudo mais homogeneo
-  h, s, _ = cv.split(hsv_frame)
-  b, g, r = cv.split(original_frame)
-  i = np.divide(b+g+r,3)
-  i = np.uint8(i)
-  filtered_frame = cv.merge((h, s, i))
-  cv.imshow("hsi", filtered_frame)
-  filtered_frame = cv.medianBlur(filtered_frame,5)
+def filter_frame(original_frame):
+  adjusted_frame = adjust_gamma(original_frame, gamma = 1.5) # reduzir as sombras - torna tudo mais homogeneo
+  filtered_frame = cv.medianBlur(adjusted_frame,9)
   return filtered_frame
 
-def filter_mask(mask): #projeção vertical para eliminar o braço -deve ser a primeira transição grande. orientação da mão a partir das linhas dos dedos e fazer uma rotação em relação a isso
-  mask, border_size = add_border(mask)
-  kernel_ellipse = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5,5)) #por vezes funde em cima (centrar mão)
+def filter_mask(mask):
+  kernel_ellipse = cv.getStructuringElement(cv.MORPH_ELLIPSE, (9,9))
+  print(kernel_ellipse.shape)
   mask = cv.morphologyEx(mask,cv.MORPH_CLOSE, kernel_ellipse)
-  mask = cv.medianBlur(mask,5)
-
-  mask = mask[border_size:-(border_size+1),border_size:-(border_size+1)] #remove border
-
-  mask = cv.dilate(mask, kernel_ellipse, iterations=2)
-  mask = cv.erode(mask, kernel_ellipse, iterations=2)
-  mask = cv.medianBlur(mask, 5)
-
+  mask = cv.medianBlur(mask,9)
+  mask = cv.dilate(mask,kernel_ellipse, iterations = 2)
+  mask = cv.medianBlur(mask, 9)
   return mask
 
 def adjust_gamma(image, gamma=1.0):
@@ -47,3 +36,23 @@ def add_border(image):
   border_size = 10
   image=cv.copyMakeBorder(image, top=border_size, bottom=border_size, left=border_size, right=border_size, borderType= cv.BORDER_CONSTANT, value=255)
   return image, border_size
+
+def get_vertical_projection(mask): #fecha o contorno inferiormente
+  mask_row_sum = np.sum(mask,axis=1)
+  bottom_to_top = list(reversed(mask_row_sum))
+  for i in range(0,len(bottom_to_top)-20):
+      if bottom_to_top[i+20] > 1.1*bottom_to_top[i]: #se o de cima for muito maior que o debaixo temos uma transição
+        index_in_mask = mask.shape[0]-i
+        non_zero_indexes = np.argwhere(mask[index_in_mask-1]) #o index in mask vai ser removido abaixo
+        first = non_zero_indexes[0]
+        last = non_zero_indexes[-1]
+
+        for x in range(np.int(first),np.int(last)):
+          print(mask.shape)
+          mask[index_in_mask-1][x] = 255
+        
+        mask = mask[0:index_in_mask,0:mask.shape[1]]
+        return mask
+
+
+  
