@@ -3,16 +3,22 @@ import numpy as np
 from calculate_contours import get_contours, fill_contours, draw_contours
 
 def get_mask(original_frame, values): #shadow removal: devem ser regiões com uma hue and sat proxima mas uma intensidsde muito mais baixa (HSI) - tentava fazer a correção na intensidade. uniformizar intensidade 
-  filtered_frame = filter_frame(original_frame)
-  hsv_frame = cv.cvtColor( filtered_frame, cv.COLOR_BGR2HSV)
+  hsv_frame = cv.cvtColor( original_frame, cv.COLOR_BGR2HSV)
+  filtered_frame = filter_frame(hsv_frame, original_frame)
   mask = cv.inRange(hsv_frame, *values)
   mask = filter_mask(mask)
   cv.imshow("final mask", mask)
   return mask
 
-def filter_frame(original_frame):
-  adjusted_frame = adjust_gamma(original_frame, gamma = 1.5) # reduzir as sombras - torna tudo mais homogeneo
-  filtered_frame = cv.medianBlur(adjusted_frame,5)
+def filter_frame(hsv_frame, original_frame):
+  #adjusted_frame = adjust_gamma(original_frame, gamma = 1.5) # reduzir as sombras - torna tudo mais homogeneo
+  h, s, _ = cv.split(hsv_frame)
+  b, g, r = cv.split(original_frame)
+  i = np.divide(b+g+r,3)
+  i = np.uint8(i)
+  filtered_frame = cv.merge((h, s, i))
+  cv.imshow("hsi", filtered_frame)
+  filtered_frame = cv.medianBlur(filtered_frame,5)
   return filtered_frame
 
 def filter_mask(mask): #projeção vertical para eliminar o braço -deve ser a primeira transição grande. orientação da mão a partir das linhas dos dedos e fazer uma rotação em relação a isso
