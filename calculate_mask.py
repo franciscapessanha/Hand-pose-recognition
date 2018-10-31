@@ -16,8 +16,7 @@ def filter_frame(original_frame):
   return filtered_frame
 
 def filter_mask(mask):
-  kernel_ellipse = cv.getStructuringElement(cv.MORPH_ELLIPSE, (9,9))
-  print(kernel_ellipse.shape)
+  kernel_ellipse = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5,5))
   mask = cv.morphologyEx(mask,cv.MORPH_CLOSE, kernel_ellipse)
   mask = cv.medianBlur(mask,9)
   mask = cv.dilate(mask,kernel_ellipse, iterations = 2)
@@ -28,14 +27,6 @@ def adjust_gamma(image, gamma=1.0):
   invGamma = 1.0 / gamma
   table = np.array([((i / 255.0) ** invGamma) * 255 for i in np.arange(0, 256)])
   return cv.LUT(image.astype(np.uint8), table.astype(np.uint8))
-
-def add_border(image):
-  row, col = image.shape[:2]
-  bottom = image[row-2:row,0:col]
-  mean=cv.mean(bottom)[0]
-  border_size = 10
-  image=cv.copyMakeBorder(image, top=border_size, bottom=border_size, left=border_size, right=border_size, borderType= cv.BORDER_CONSTANT, value=255)
-  return image, border_size
 
 def get_vertical_projection(mask): #fecha o contorno inferiormente
   mask_row_sum = np.sum(mask,axis=1)
@@ -48,7 +39,6 @@ def get_vertical_projection(mask): #fecha o contorno inferiormente
         last = non_zero_indexes[-1]
 
         for x in range(np.int(first),np.int(last)):
-          print(mask.shape)
           mask[index_in_mask-1][x] = 255
         
         mask = mask[0:index_in_mask,0:mask.shape[1]]

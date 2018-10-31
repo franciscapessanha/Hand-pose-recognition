@@ -14,6 +14,7 @@ def fill_contours(contours,mask):
   for contour in contours:
     np.asarray(contours)
     cv.fillPoly(new_mask, pts =np.asarray(contours), color=(255,255,255))
+
   return new_mask
 
 def draw_contours(frame_copy, contours):

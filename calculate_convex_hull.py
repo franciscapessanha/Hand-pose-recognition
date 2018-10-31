@@ -36,11 +36,17 @@ def get_point_in_range(point, hull, cluster_range):
       break
   return in_range, closest_hull_point
 
-def calculate_convexity_defects(contours, clustered_hulls_vertices, cluster_range):
+def calculate_convexity_defects(contours, clustered_hulls_vertices, cluster_range, frame_copy):
   contours_with_defects = []
   for contour, clustered_hull in zip(contours, clustered_hulls_vertices):
     contour_with_defects = []
     hull = cv.convexHull(contour, returnPoints = False)
+    #print(contour.shape)
+    print(contour[int(hull[0])][0])
+    
+    cv.circle(frame_copy,(contour[int(hull[0])][0][0],contour[int(hull[0])][0][1]),10,(255,255,0),2)
+    cv.circle(frame_copy,(contour[int(hull[1])][0][0],contour[int(hull[1])][0][1]),10,(255,0,255),2)
+    #experimentar fazer cluster com o cluster hulls 
     defects = cv.convexityDefects(contour, hull)
     if defects is None:
       continue
