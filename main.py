@@ -10,12 +10,14 @@ title = 'Hand Labeling v0.1'
 state = 'start'
 sample = None
 threshold = None
+frame_rate = 1
+video_frame_rate = 1
 
 def get_frame_rate(video_capture_source, video_capture):
-  if type(video_capture_source) == int:
-    return 1
-  else:
-    return int(video_capture.get(cv.CAP_PROP_FPS))
+  global video_frame_rate, frame_rate
+  if not type(video_capture_source) == int:
+    video_frame_rate = int(video_capture.get(cv.CAP_PROP_FPS))
+    frame_rate = video_frame_rate
 
 def format_frame(frame, video_capture_source):
   if type(video_capture_source) == int: # Video Capture Device is a web camera
@@ -51,9 +53,21 @@ def c_key_pressed():
     create_calibration_window()
     state = 'calibrating'
 
+def space_pressed():
+  global state, frame_rate
+  if state == 'labeling':
+    frame_rate = 0
+    state = 'paused'
+  elif state == 'paused':
+    frame_rate = video_frame_rate
+    state = 'labeling'
+
 def handle_key(key, frame):
+  global frame_rate
   if key == 27: # Esc key pressed
     return False
+  elif key == 32: # Space key pressed
+    space_pressed()
   elif key == 13: # Enter key pressed
     enter_pressed(frame)
   elif key == 99: # C key pressed
@@ -77,17 +91,19 @@ def handle_display(frame):
 
 def label_video(video_capture_source):
   cap = cv.VideoCapture(video_capture_source)
-  frame_rate = get_frame_rate(video_capture_source, cap)
+  get_frame_rate(video_capture_source, cap)
 
   while(True):
     # Capture frame-by-frame
     _, frame = cap.read()
+    if frame is None:
+      print('Video ended. Closing...')
+      break
+
     frame = format_frame(frame, video_capture_source)
     if not handle_key(cv.waitKey(frame_rate), frame):
       break
  
-    if frame is None:
-      break
 
     frame = format_frame(frame, video_capture_source)
 
