@@ -45,8 +45,7 @@ def calculate_convexity_defects(contours, clustered_hulls_vertices, cluster_rang
     if defects is None:
       continue
     for i in range(defects.shape[0]):
-      s,e,f,d = defects[i,0]
-      #if d> 30 #elimina valores muito proximos do cluster hull
+      s,e,f,_= defects[i,0]
 
       start = contour[s][0]
       end = contour[e][0]
@@ -70,6 +69,6 @@ def draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices,contours):
     color = (0, 0, 255) # red - color for convex hull
     cv.drawContours(frame_copy, hulls, i, color, 2, 8)
   
-  for hull in clustered_hulls_vertices:
-    for point in hull:
-      cv.circle(frame_copy,(point.item(0), point.item(1)),2,(255,0,0),2)
+  #for hull in clustered_hulls_vertices:
+    #for point in hull:
+      #cv.circle(frame_copy,(point.item(0), point.item(1)),2,(255,0,0),2)

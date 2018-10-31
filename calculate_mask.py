@@ -1,31 +1,33 @@
 import cv2 as cv
 import numpy as np
+from calculate_contours import get_contours, fill_contours, draw_contours
 
-
-def get_mask(original_frame, values):
+def get_mask(original_frame, values): #shadow removal: devem ser regiões com uma hue and sat proxima mas uma intensidsde muito mais baixa (HSI) - tentava fazer a correção na intensidade. uniformizar intensidade 
   filtered_frame = filter_frame(original_frame)
   hsv_frame = cv.cvtColor( filtered_frame, cv.COLOR_BGR2HSV)
   mask = cv.inRange(hsv_frame, *values)
-  filter_mask(mask)
+  mask = filter_mask(mask)
+  cv.imshow("final mask", mask)
   return mask
 
 def filter_frame(original_frame):
   adjusted_frame = adjust_gamma(original_frame, gamma = 1.5) # reduzir as sombras - torna tudo mais homogeneo
-  filtered_frame = cv.medianBlur(adjusted_frame,9)
+  filtered_frame = cv.medianBlur(adjusted_frame,5)
   return filtered_frame
 
-def filter_mask(mask):
+def filter_mask(mask): #projeção vertical para eliminar o braço -deve ser a primeira transição grande. orientação da mão a partir das linhas dos dedos e fazer uma rotação em relação a isso
   mask, border_size = add_border(mask)
-  kernel_ellipse = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5,5))
-  
+  kernel_ellipse = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5,5)) #por vezes funde em cima (centrar mão)
   mask = cv.morphologyEx(mask,cv.MORPH_CLOSE, kernel_ellipse)
   mask = cv.medianBlur(mask,5)
+
   mask = mask[border_size:-(border_size+1),border_size:-(border_size+1)] #remove border
 
-  kernel_ellipse = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5,5))
-  mask = cv.dilate(mask,kernel_ellipse, iterations = 2)
-  mask = cv.erode(mask, kernel_ellipse)
+  mask = cv.dilate(mask, kernel_ellipse, iterations=2)
+  mask = cv.erode(mask, kernel_ellipse, iterations=2)
   mask = cv.medianBlur(mask, 5)
+
+  return mask
 
 def adjust_gamma(image, gamma=1.0):
   invGamma = 1.0 / gamma

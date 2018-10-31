@@ -6,6 +6,7 @@ def get_contours(mask):
   contours = sorted(contours, key = cv.contourArea, reverse = True) 
   contours = [contours[i] for i in range(len(contours)) if cv.contourArea(contours[i]) > 0.50 * cv.contourArea(contours[0])]
   mask = fill_contours(contours,mask)
+
   return contours
 
 def fill_contours(contours,mask):
