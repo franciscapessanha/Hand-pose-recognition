@@ -8,7 +8,6 @@ def get_fingers(mask,original_frame):
   frame_copy = np.copy(original_frame)
   contours = get_contours(mask)
   draw_contours(frame_copy,contours)
-  
   hulls, clustered_hulls_vertices = get_convex_hulls(contours, mask)
   draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices,contours)
   cluster_range=10
