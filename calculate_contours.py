@@ -14,18 +14,24 @@ def fill_contours(contours,mask):
   for contour in contours:
     np.asarray(contours)
     cv.fillPoly(new_mask, pts =np.asarray(contours), color=(255,255,255))
+    bounding_box(contour, mask)
 
   return new_mask
 
 def draw_contours(frame_copy, contours):
   cv.drawContours(frame_copy, contours,-1,(0,255,0),2) # green - color for contours 
 
-def bounding_box(contour):
+def bounding_box(contour, mask):
+  mask_cop = np.copy(mask)
   rect = cv.minAreaRect(contour)
   box = cv.boxPoints(rect)
   box = np.int0(box)
   print(box[0])
+  mask_cop = cv.cvtColor(mask_cop,cv.COLOR_GRAY2BGR)
+  cv.drawContours(mask_cop,[box],0,(0,0,255),2)
+  cv.imshow("mask with bounding", mask_cop)
   return box
+
 
 #def crop_min_area_rect(contour, mask):
   #x,y,h,w = cv.boundingRect(contour)
