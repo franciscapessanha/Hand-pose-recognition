@@ -1,6 +1,7 @@
 import cv2 as cv
 import sys
 import numpy as np
+import math
 from calculate_mask import get_mask
 from display import *
 from calculate_fingers import get_fingers
@@ -22,13 +23,25 @@ def get_frame_rate(video_capture_source, video_capture):
 def format_frame(frame, video_capture_source):
   if type(video_capture_source) == int: # Video Capture Device is a web camera
     frame = cv.flip(frame, 1)
-
-  frame = cv.resize(frame, (640,360)) #this way every video will have the same dimension - and so the kernels will be right!
+  new_size = get_new_size(frame)
+  frame = cv.resize(frame, (new_size[1],new_size[0])) #this way every video will have the similar dimensions - and so the kernels will be right!
   return frame
 
 def format_image(image):
-  return cv.resize(image, (640,360)) #this way every video will have the same dimension - and so the kernels will be right!
+  new_size = get_resize(image)
+  return cv.resize(image, (new_size[1],new_size[0])) #this way every video will have the similar dimensions - and so the kernels will be right!
 
+def get_new_size(image):
+  size = image.shape
+  size = list(size)
+  if size[0] >= size[1]:
+    size[1] = int(size[1] * (640/size[0]))
+    size[0] = 640
+  
+  elif size[0] < size[1]:
+    size[0] = int(size[0] * (640/size[1]))
+    size[1] = 640
+  return size
 
 def enter_pressed(frame):
   global state, threshold, sample
