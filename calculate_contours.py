@@ -26,7 +26,6 @@ def bounding_box(contour, mask):
   rect = cv.minAreaRect(contour)
   box = cv.boxPoints(rect)
   box = np.int0(box)
-  print(box[0])
   mask_cop = cv.cvtColor(mask_cop,cv.COLOR_GRAY2BGR)
   cv.drawContours(mask_cop,[box],0,(0,0,255),2)
   cv.imshow("mask with bounding", mask_cop)

@@ -28,7 +28,7 @@ def format_frame(frame, video_capture_source):
   return frame
 
 def format_image(image):
-  new_size = get_resize(image)
+  new_size = get_new_size(image)
   return cv.resize(image, (new_size[1],new_size[0])) #this way every video will have the similar dimensions - and so the kernels will be right!
 
 def get_new_size(image):
