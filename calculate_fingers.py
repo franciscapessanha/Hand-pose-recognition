@@ -12,7 +12,7 @@ def get_fingers(mask,original_frame):
   hulls, clustered_hulls_vertices = get_convex_hulls(contours, mask)
   draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices,contours)
   cluster_range=10
-  contours_with_defects = calculate_convexity_defects(contours,clustered_hulls_vertices,cluster_range,frame_copy)
+  contours_with_defects = calculate_convexity_defects(contours, clustered_hulls_vertices)
   count_fingers = draw_defects(frame_copy,contours_with_defects, mask)
   return frame_copy, count_fingers 
 

@@ -18,55 +18,41 @@ def cluster_hulls_vertices(hulls, radius):
       best_point, min_dist = 0, 9999
       mean_point = np.mean(cluster, axis=0).astype(int)
       for point in cluster:
-        dist = np.linalg.norm(point-mean_point)
+        dist = np.linalg.norm(point - mean_point)
         if dist < min_dist:
-          best_point = mean_point
+          best_point = point
           min_dist = dist
       mean_point_cluster.append(best_point)
     clustered_hulls_vertices.append(mean_point_cluster)
   return clustered_hulls_vertices
 
-def get_point_in_range(point, hull, cluster_range):
-  in_range = False
-  closest_hull_point = None
+def get_indexed_hull(contour, hull):
+  indexed_hull = []
   for hull_point in hull:
-    if np.linalg.norm(hull_point-point) < cluster_range:
-      in_range = True
-      closest_hull_point = hull_point
-      break
-  return in_range, closest_hull_point
+    for index, contour_point in enumerate(contour):
+      if contour_point[0][0] == hull_point[0] and contour_point[0][1] == hull_point[1]:
+        indexed_hull.append(index)
 
-def calculate_convexity_defects(contours, clustered_hulls_vertices, cluster_range, frame_copy):
+  return np.array(indexed_hull)
+
+def calculate_convexity_defects(contours, clustered_hulls_vertices):
   contours_with_defects = []
   for contour, clustered_hull in zip(contours, clustered_hulls_vertices):
     contour_with_defects = []
     hull = cv.convexHull(contour, returnPoints = False)
-    #print(contour.shape)
-    print(contour[int(hull[0])][0])
-    
-    cv.circle(frame_copy,(contour[int(hull[0])][0][0],contour[int(hull[0])][0][1]),10,(255,255,0),2)
-    cv.circle(frame_copy,(contour[int(hull[1])][0][0],contour[int(hull[1])][0][1]),10,(255,0,255),2)
-    #experimentar fazer cluster com o cluster hulls 
-    defects = cv.convexityDefects(contour, hull)
+
+    indexed_hull = get_indexed_hull(contour, clustered_hull)
+
+    defects = cv.convexityDefects(contour, indexed_hull)
     if defects is None:
       continue
     for i in range(defects.shape[0]):
       s,e,f,_= defects[i,0]
-
       start = contour[s][0]
       end = contour[e][0]
       defect_point = contour[f][0]
-      in_range, _ = get_point_in_range(defect_point, clustered_hull, cluster_range)
-      if not in_range:
-        start_in_range, start_in_hull = get_point_in_range(start, clustered_hull, cluster_range)
-        if not start_in_range:
-          start_in_hull = start
+      contour_with_defects.append([start, defect_point, end])
 
-        end_in_range, end_in_hull = get_point_in_range(end, clustered_hull, cluster_range)
-        if not end_in_range:
-          end_in_hull = end
-
-        contour_with_defects.append([np.array(start_in_hull).flatten(), np.array(defect_point).flatten(), np.array(end_in_hull).flatten()])
     contours_with_defects.append(contour_with_defects)
   return contours_with_defects
 
