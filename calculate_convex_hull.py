@@ -5,6 +5,11 @@ from sklearn.cluster import DBSCAN
 def get_convex_hulls(contours,frame_copy):
   hulls = [cv.convexHull(contour,False) for contour in contours]
   clustered_hulls_vertices = cluster_hulls_vertices(hulls, 20)
+    
+  for hull in clustered_hulls_vertices:
+    for point in hull:
+      cv.circle(frame_copy,(point.item(0), point.item(1)),2,(255,0,0),2)
+  
   return hulls, clustered_hulls_vertices
 
 def cluster_hulls_vertices(hulls, radius): 
@@ -61,6 +66,6 @@ def draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices,contours):
     color = (0, 0, 255) # red - color for convex hull
     cv.drawContours(frame_copy, hulls, i, color, 2, 8)
   
-  #for hull in clustered_hulls_vertices:
-    #for point in hull:
-      #cv.circle(frame_copy,(point.item(0), point.item(1)),2,(255,0,0),2)
+  for hull in clustered_hulls_vertices:
+    for point in hull:
+      cv.circle(frame_copy,(point.item(0), point.item(1)),2,(255,0,0),6)
