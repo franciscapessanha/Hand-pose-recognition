@@ -6,6 +6,8 @@ from calculate_mask import get_mask
 from display import *
 from calculate_fingers import get_fingers
 from helpers import is_int
+import random
+import string
 
 title = 'Hand Labeling v0.1'
 state = 'start'
@@ -158,6 +160,11 @@ def handle_key(key, frame):
     c_key_pressed()
   elif key == 115: # S key pressed
     s_key_pressed(frame)
+  elif key == 113: # Q key pressed
+    if state == 'labeling':
+      mask = get_mask(frame,threshold)
+      frame_copy, _ = get_fingers(mask,frame)
+      cv.imwrite(''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) + '.jpg', frame_copy)
 
   return True
 
@@ -173,7 +180,7 @@ def handle_display(frame):
     cv.imshow(title + ' - Press ENTER to sample', frame)
   elif state == 'labeling':
     mask = get_mask(frame,threshold)
-    frame_copy, text  = get_fingers(mask,frame)
+    frame_copy, text = get_fingers(mask,frame)
     add_string_frame(frame_copy, text)
     cv.imshow(title, frame_copy)
   elif state == 'calibrating':
