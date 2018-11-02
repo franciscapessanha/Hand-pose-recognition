@@ -83,8 +83,7 @@ def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices)
       area_hull = cv.contourArea(np.array(hull))
       area_contour = cv.contourArea(np.asarray(contour))
       arearatio= (area_hull - area_contour)/area_contour
-      print(arearatio)
-      if arearatio > 0.20: #ver melhor!
+      if arearatio > 0.30:
         hand_gesture='all right'
       else:
         hand_count_list.append(3)
