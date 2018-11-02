@@ -27,7 +27,7 @@ if run without parameters it will default to video capture device with id 0
 ```bash
 python3 main.py <file-path>
 ```
-only `.mp4`m `.jpg` and `.png` files are supported
+only `.mp4`, `.jpg` and `.png` files are supported
 
 ### Basic Usage
 When first open press `ENTER` to sample hand skin color, using the mouse, confirm the region by pressing `ENTER` again.
