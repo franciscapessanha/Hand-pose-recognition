@@ -63,6 +63,7 @@ def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices)
   hand_count_list=[]
 
   for count_fingers,contour,hull in zip(count_fingers_list,contours,clustered_hulls_vertices):
+    hand_gesture=''
     if count_fingers==1:
       x,y,w,h= cv.boundingRect(contour)
       ratio_width_height=w/h
