@@ -60,9 +60,7 @@ def filter_vertices_by_angle(triple,max_angle):
 
 def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices):
   text=[]
-  hand_gesture_list=[]
   hand_count_list=[]
-  hand_gesture=''
 
   for count_fingers,contour,hull in zip(count_fingers_list,contours,clustered_hulls_vertices):
     if count_fingers==1:
@@ -70,33 +68,51 @@ def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices)
       ratio_width_height=w/h
       if h > w: #image is vertical
         if ratio_width_height > 0.65:
-          hand_gesture='ok'
+          text.append('ok')
         else:
           hand_count_list.append(1)
       if w >= h: #image is horizontal
         if ratio_width_height < 1/0.65:
-           hand_gesture='ok'
+           text.append('ok')
         else:
-          hand_gesture='pointer'
+          text.append('pointer')
     
     elif count_fingers==3:
+      x,y,w,h= cv.boundingRect(contour)
+      ratio_width_height=w/h
+      if h > w: #image is vertical
+        if ratio_width_height > 0.65:
+          text.append('all right')
+        else:
+          hand_count_list.append(3)
+          text.append(str(count_fingers))
+      if w >= h: #image is horizontal
+        if ratio_width_height < 1/0.65:
+           text.append('all right')
+        else:
+          hand_count_list.append(3)
+          text.append(str(count_fingers))
+      '''
       area_hull = cv.contourArea(np.array(hull))
       area_contour = cv.contourArea(np.asarray(contour))
       arearatio= (area_hull - area_contour)/area_contour
+      x,y,w,h= cv.boundingRect(contour)
+      ratio_width_height=w/h
+      print(ratio_width_height)
       if arearatio > 0.30:
         hand_gesture='all right'
       else:
         hand_count_list.append(3)
-      
+      '''
     else:
       hand_count_list.append(count_fingers)
-    
-    if hand_gesture: text.append(hand_gesture)
-
-  if hand_count_list: 
+ 
+  
+  if len(hand_count_list)>1 and all(isinstance(x, int) for x in hand_count_list): 
+    text=[]
     sum_fingers=sum(hand_count_list)
     text.append(str(sum_fingers))
-
+  
   text.reverse()
   text=' '.join(text)
   return text
