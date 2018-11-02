@@ -15,9 +15,6 @@ def filter_frame(original_frame):
   return filtered_frame
 
 def filter_mask(mask):
-  kernel_ellipse = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5,5))
-  mask = cv.morphologyEx(mask,cv.MORPH_CLOSE, kernel_ellipse)
-  mask = cv.medianBlur(mask,9)
   kernel_ellipse = cv.getStructuringElement(cv.MORPH_ELLIPSE, (3,3))
   mask = cv.dilate(mask,kernel_ellipse, iterations = 2)
   mask = cv.medianBlur(mask, 9)
