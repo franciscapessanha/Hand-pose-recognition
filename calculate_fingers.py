@@ -28,7 +28,6 @@ def draw_defects(frame_copy, contours_with_defects,mask): #alterar - retirar cou
       triple1 = contour_with_defects[i]
       triple2 = contour_with_defects[i - 1]
       new_triple = [triple1[1], triple2[2], triple2[1]]
-      
       if check_frame_edge(triple1, triple2, mask):
         cv.circle(frame_copy,tuple(new_triple[1]),3,[0,255,0],3)
         continue

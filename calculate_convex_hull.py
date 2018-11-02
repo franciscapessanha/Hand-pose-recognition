@@ -39,7 +39,6 @@ def calculate_convexity_defects(contours, clustered_hulls_vertices):
   contours_with_defects = []
   for contour, clustered_hull in zip(contours, clustered_hulls_vertices):
     contour_with_defects = []
-
     indexed_hull = get_indexed_hull(contour, clustered_hull)
 
     defects = cv.convexityDefects(contour, indexed_hull)
