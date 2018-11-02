@@ -59,7 +59,7 @@ def calculate_convexity_defects(contours, clustered_hulls_vertices):
 def draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices,contours):
   for i in range(len(contours)):
     color = (0, 0, 255) # red - color for convex hull
-    #cv.drawContours(frame_copy, hulls, i, color, 2, 8)
+    cv.drawContours(frame_copy, hulls, i, color, 2, 8)
   
   #for hull in clustered_hulls_vertices:
     #for point in hull:

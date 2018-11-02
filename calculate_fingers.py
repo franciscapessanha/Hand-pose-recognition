@@ -11,9 +11,9 @@ def get_fingers(mask,original_frame):
   hulls, clustered_hulls_vertices = get_convex_hulls(contours, mask)
   draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices,contours)
   cluster_range=10
-  contours_with_defects = calculate_convexity_defects(contours, clustered_hulls_vertices)
+  contours_with_defects = calculate_convexity_defects(contours,clustered_hulls_vertices)
   count_fingers_list = draw_defects(frame_copy,contours_with_defects, mask)
-  text=identify_fingers(count_fingers_list,contours,mask)
+  text=identify_fingers(count_fingers_list,contours,mask,clustered_hulls_vertices)
   return frame_copy, text 
 
 def draw_defects(frame_copy, contours_with_defects,mask): #alterar - retirar count_fingers; usar um criterio de área para eliminar o piel inferior
@@ -57,17 +57,14 @@ def filter_vertices_by_angle(triple,max_angle):
     return True
 
   return False
-'''
 
-      '''
-
-def identify_fingers(count_fingers_list,contours,mask):
+def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices):
   text=[]
   hand_gesture_list=[]
   hand_count_list=[]
   hand_gesture=''
 
-  for count_fingers,contour in zip(count_fingers_list,contours):
+  for count_fingers,contour,hull in zip(count_fingers_list,contours,clustered_hulls_vertices):
     if count_fingers==1:
       x,y,w,h= cv.boundingRect(contour)
       ratio_width_height=w/h
@@ -82,8 +79,15 @@ def identify_fingers(count_fingers_list,contours,mask):
         else:
           hand_gesture='pointer'
     
-    #elif count_fingers==3:
-      
+    elif count_fingers==3:
+      area_hull = cv.contourArea(np.array(hull))
+      area_contour = cv.contourArea(np.asarray(contour))
+      arearatio= (area_hull - area_contour)/area_contour
+      print(arearatio)
+      if arearatio > 0.20: #ver melhor!
+        hand_gesture='all right'
+      else:
+        hand_count_list.append(3)
       
     else:
       hand_count_list.append(count_fingers)
