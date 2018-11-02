@@ -56,7 +56,7 @@ def crop_vertical_mask(mask,right_side_up): #fecha o contorno inferiormente
         first = non_zero_indexes[0]
         last = non_zero_indexes[-1]
         for x in range(np.int(first),np.int(last)):
-          mask[index_in_mask-1,x] = 255
+          mask[index_in_mask-1,x] = 1
         mask[index_in_mask:mask.shape[0],0:mask.shape[1]] = 0
         return mask
   else:
@@ -68,7 +68,7 @@ def crop_vertical_mask(mask,right_side_up): #fecha o contorno inferiormente
         first = non_zero_indexes[0]
         last = non_zero_indexes[-1]
         for x in range(np.int(first),np.int(last)):
-          mask[index_in_mask-1,x] = 255
+          mask[index_in_mask-1,x] = 1
         mask[0:index_in_mask,0:mask.shape[1]] = 0
         return mask
 
@@ -84,7 +84,7 @@ def crop_horizontal_mask(mask,pointing_right):  #fecha  o contorno inferiormente
         first  = non_zero_indexes[0]
         last  = non_zero_indexes[-1]
         for y in range(np.int(first),np.int(last)):
-          mask[y,index_in_mask-1] = 255
+          mask[y,index_in_mask-1] = 1
         mask[0:mask.shape[0],0:index_in_mask] = 0
         return mask
   else:
@@ -96,6 +96,6 @@ def crop_horizontal_mask(mask,pointing_right):  #fecha  o contorno inferiormente
         first = non_zero_indexes[0]
         last = non_zero_indexes[-1]
         for y in range(np.int(first),np.int(last)):
-          mask[y,index_in_mask-1] = 255
+          mask[y,index_in_mask-1] = 1
         mask[0:mask.shape[0],index_in_mask:mask.shape[1]] = 0
         return mask
