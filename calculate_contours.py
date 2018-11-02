@@ -3,10 +3,10 @@ import numpy as np
 from numpy import linalg
 
 def get_contours(mask):
-  contours = find_contours(mask)
-  mask = crop_mask (contours, mask)
   #contours = find_contours(mask)
-  #mask = fill_contours(contours,mask)
+  #mask = crop_mask (contours, mask) # nao funciona com 2 maos pq une tudo na base
+  contours = find_contours(mask)
+  mask = fill_contours(contours,mask)
   return contours
 
 def find_contours(mask):
@@ -26,7 +26,10 @@ def fill_contours(contours,mask):
 
 def draw_contours(frame_copy, contours):
   cv.drawContours(frame_copy, contours,-1,(0,255,0),2) # green - color for contours 
-    
+  for contour in contours:
+    x,y,w,h= cv.boundingRect(contour)
+    #cv.rectangle(frame_copy,(x,y),(x+w,y+h),(0,255,0),2) #desenho bonding box
+
 
 def crop_mask(contours, mask):
   for contour in contours:
@@ -37,6 +40,7 @@ def crop_mask(contours, mask):
     if w >= h: #image is horizontal
       mask = crop_horizontal_mask(mask)
       return mask
+     
     
 ##deve haver uma forma mais compacta de fazer isto 
 

@@ -96,8 +96,8 @@ def handle_display(frame):
     cv.imshow(title + ' - Press ENTER to sample', frame)
   elif state == 'labeling':
     mask = get_mask(frame,threshold)
-    frame_copy, count_fingers  = get_fingers(mask,frame)
-    add_string_frame(frame_copy, str(count_fingers))
+    frame_copy, text  = get_fingers(mask,frame)
+    add_string_frame(frame_copy, text)
     cv.imshow(title, frame_copy)
   elif state == 'calibrating':
     open_calibration_window(frame, sample)
@@ -138,11 +138,13 @@ def label_image(image_source):
       running = 1
     else:
       running = 0
+      handle_display(image)
 
     if not handle_key(cv.waitKey(running), image): 
       break
 
-    handle_display(image)
+    #handle_display(image)
+    
 
 def handle_arguments():
   if len(sys.argv) == 1:
