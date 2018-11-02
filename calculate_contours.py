@@ -25,9 +25,6 @@ def fill_contours(contours,mask):
 
 def draw_contours(frame_copy, contours):
   cv.drawContours(frame_copy, contours,-1,(0,255,0),2) # green - color for contours 
-  for contour in contours:
-    x,y,w,h= cv.boundingRect(contour)
-    #cv.rectangle(frame_copy,(x,y),(x+w,y+h),(0,255,0),2) #desenho bonding box
 
 def crop_mask(contours, mask):
   for contour in contours:
