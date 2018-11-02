@@ -164,7 +164,6 @@ def handle_key(key, frame):
     if state == 'labeling':
       mask = get_mask(frame,threshold)
       frame_copy, _ = get_fingers(mask,frame)
-      cv.imwrite(''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) + '.jpg', frame_copy)
 
   return True
 
@@ -183,6 +182,7 @@ def handle_display(frame):
     frame_copy, text = get_fingers(mask,frame)
     add_string_frame(frame_copy, text)
     cv.imshow(title, frame_copy)
+    cv.imwrite(''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) + '.jpg', frame_copy)
   elif state == 'calibrating':
     open_calibration_window(frame, sample)
 

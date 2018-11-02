@@ -63,5 +63,5 @@ def draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices,contours):
   for hull in clustered_hulls_vertices:
     for point in hull:
       # ligth blue - color for convex hull vertices before convexity defects
-      cv.circle(frame_copy,(point.item(0), point.item(1)),12,(255,255,0),2) 
+      cv.circle(frame_copy,(point.item(0), point.item(1)),12,(255,0,0),2) 
       

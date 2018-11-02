@@ -9,20 +9,20 @@ def get_fingers(mask,original_frame):
   contours = get_contours(mask) 
   draw_contours(frame_copy,contours)
   hulls, clustered_hulls_vertices = get_convex_hulls(contours, mask)
-  draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices,contours)
+  #draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices,contours)
   contours_with_defects = calculate_convexity_defects(contours,clustered_hulls_vertices)
   count_fingers_list = draw_defects(frame_copy,contours_with_defects, mask)
-  text=identify_fingers(count_fingers_list,contours,mask,clustered_hulls_vertices)
-  return frame_copy, text 
+  text=identify_fingers(count_fingers_list,contours,mask,clustered_hulls_vertices,frame_copy)
+  return frame_copy, text
 
 def draw_defects(frame_copy, contours_with_defects,mask): #alterar - retirar count_fingers; usar um criterio de área para eliminar o piel inferior
   count_fingers_list = []
   for contour_with_defects in contours_with_defects:
     count_fingers = 0
-    for new_triple in contour_with_defects:
-      # blue lines - contour with defects
-      cv.line(frame_copy,tuple(new_triple[0]),tuple(new_triple[1]),[255,0,0],2)
-      cv.line(frame_copy,tuple(new_triple[1]),tuple(new_triple[2]),[255,0,0],2)
+    #for new_triple in contour_with_defects:
+      #blue lines - contour with defects
+      #cv.line(frame_copy,tuple(new_triple[0]),tuple(new_triple[1]),[255,0,0],2)
+      #cv.line(frame_copy,tuple(new_triple[1]),tuple(new_triple[2]),[255,0,0],2)
     for i in range(0,len(contour_with_defects)):
       #cv.circle(frame_copy,tuple(contour_with_defects[i][0]),10,[0,0,255],3)
       triple1 = contour_with_defects[i]
@@ -33,9 +33,9 @@ def draw_defects(frame_copy, contours_with_defects,mask): #alterar - retirar cou
         cv.circle(frame_copy,tuple(new_triple[1]),3,[0,255,0],3)
         continue
       if filter_vertices_by_angle(new_triple,60):
-        cv.circle(frame_copy,tuple(new_triple[1]),5,[0,0,255],3)
-        #cv.circle(frame_copy,tuple(new_triple[0]),8,[0,255,0],3)
-        #cv.circle(frame_copy,tuple(new_triple[2]),10,[255,0,0],3)
+        cv.circle(frame_copy,tuple(new_triple[1]),10,[0,0,255],2)
+        #cv.circle(frame_copy,tuple(new_triple[0]),10,[0,255,0],2)
+        #cv.circle(frame_copy,tuple(new_triple[2]),10,[0,255,0],2)
         count_fingers = count_fingers + 1 #analisar o interior  -verificar se pertence à mascara
     count_fingers_list.append(count_fingers)
   return count_fingers_list
@@ -58,7 +58,7 @@ def filter_vertices_by_angle(triple,max_angle):
 
   return False
 
-def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices):
+def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices,frame_copy):
   text=[]
   hand_count_list=[]
 
@@ -66,6 +66,8 @@ def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices)
     hand_gesture=''
     if count_fingers==1:
       x,y,w,h= cv.boundingRect(contour)
+      cv.rectangle(frame_copy,(x,y),(x+w,y+h),(255,0,0),2)
+
       ratio_width_height=w/h
       if h > w: #image is vertical
         if ratio_width_height > 0.65:
@@ -82,6 +84,7 @@ def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices)
     elif count_fingers==3:
       x,y,w,h= cv.boundingRect(contour)
       ratio_width_height=w/h
+      #cv.rectangle(frame_copy,(x,y),(x+w,y+h),(255,0,0),2)
       if h > w: #image is vertical
         if ratio_width_height > 0.65:
           text.append('all right')
@@ -94,18 +97,7 @@ def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices)
         else:
           hand_count_list.append(3)
           text.append(str(count_fingers))
-      '''
-      area_hull = cv.contourArea(np.array(hull))
-      area_contour = cv.contourArea(np.asarray(contour))
-      arearatio= (area_hull - area_contour)/area_contour
-      x,y,w,h= cv.boundingRect(contour)
-      ratio_width_height=w/h
-      print(ratio_width_height)
-      if arearatio > 0.30:
-        hand_gesture='all right'
-      else:
-        hand_count_list.append(3)
-      '''
+
     else:
       hand_count_list.append(count_fingers)
       text.append(str(count_fingers))
@@ -119,14 +111,3 @@ def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices)
   text.reverse()
   text=' '.join(text)
   return text
-
-def find_circle(mask,frame_copy):
-  circles = cv.HoughCircles(mask, cv.HOUGH_GRADIENT, 1, 20, 200, 50)
-  print(circles)
-  #if circles is not None:
-	  #circles = np.uint8(np.around(circles))
-    #for i in circles[0,:]:
-      #cv.circle(frame_copy, (i[0], i[1]), i[2],(0,255,0),-1)
-  
-
-  

@@ -30,16 +30,18 @@ def crop_mask(contours, mask):
   for contour in contours:
     x,y,w,h= cv.boundingRect(contour)
     cropped_mask = mask[y:y+h,x:x+w]
-    
     if h > w: #image is vertical
       if y == 0: right_side_up = False
       else: right_side_up = True
       mask[y:y+h,x:x+w] = crop_vertical_mask(cropped_mask,right_side_up)  
-    
-    if w >= h: #image is horizontal
+
+    elif w >= h: #image is horizontal
       if x == 0: pointing_right = True
       else: pointing_right = False
       mask[y:y+h,x:x+w] = crop_horizontal_mask(cropped_mask,pointing_right)
+      cv.imshow("new mask",mask[y:y+h,x:x+w])
+    
+      
 
   return mask
     

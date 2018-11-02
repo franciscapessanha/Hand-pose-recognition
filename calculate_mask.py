@@ -6,7 +6,6 @@ def get_mask(original_frame, values):
   hsv_frame = cv.cvtColor( filtered_frame, cv.COLOR_BGR2HSV)
   mask = cv.inRange(hsv_frame, *values)
   mask = filter_mask(mask)
-  cv.imshow("mask", mask)
   return mask
 
 def filter_frame(original_frame):
