@@ -5,11 +5,6 @@ from sklearn.cluster import DBSCAN
 def get_convex_hulls(contours,frame_copy):
   hulls = [cv.convexHull(contour,False) for contour in contours]
   clustered_hulls_vertices = cluster_hulls_vertices(hulls, 20)
-    
-  for hull in clustered_hulls_vertices:
-    for point in hull:
-      cv.circle(frame_copy,(point.item(0), point.item(1)),2,(255,0,0),2)
-  
   return hulls, clustered_hulls_vertices
 
 def cluster_hulls_vertices(hulls, radius): 
@@ -44,7 +39,6 @@ def calculate_convexity_defects(contours, clustered_hulls_vertices):
   contours_with_defects = []
   for contour, clustered_hull in zip(contours, clustered_hulls_vertices):
     contour_with_defects = []
-    hull = cv.convexHull(contour, returnPoints = False)
 
     indexed_hull = get_indexed_hull(contour, clustered_hull)
 
@@ -68,4 +62,6 @@ def draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices,contours):
   
   for hull in clustered_hulls_vertices:
     for point in hull:
-      cv.circle(frame_copy,(point.item(0), point.item(1)),2,(255,0,0),6)
+      # ligth blue - color for convex hull vertices before convexity defects
+      cv.circle(frame_copy,(point.item(0), point.item(1)),12,(255,255,0),2) 
+      

@@ -10,7 +10,6 @@ def get_fingers(mask,original_frame):
   draw_contours(frame_copy,contours)
   hulls, clustered_hulls_vertices = get_convex_hulls(contours, mask)
   draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices,contours)
-  cluster_range=10
   contours_with_defects = calculate_convexity_defects(contours,clustered_hulls_vertices)
   count_fingers_list = draw_defects(frame_copy,contours_with_defects, mask)
   text=identify_fingers(count_fingers_list,contours,mask,clustered_hulls_vertices)
@@ -21,6 +20,7 @@ def draw_defects(frame_copy, contours_with_defects,mask): #alterar - retirar cou
   for contour_with_defects in contours_with_defects:
     count_fingers = 0
     for new_triple in contour_with_defects:
+      # blue lines - contour with defects
       cv.line(frame_copy,tuple(new_triple[0]),tuple(new_triple[1]),[255,0,0],2)
       cv.line(frame_copy,tuple(new_triple[1]),tuple(new_triple[2]),[255,0,0],2)
     for i in range(0,len(contour_with_defects)):
@@ -72,6 +72,7 @@ def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices)
           text.append('ok')
         else:
           hand_count_list.append(1)
+          text.append(str(count_fingers))
       if w >= h: #image is horizontal
         if ratio_width_height < 1/0.65:
            text.append('ok')
@@ -107,6 +108,7 @@ def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices)
       '''
     else:
       hand_count_list.append(count_fingers)
+      text.append(str(count_fingers))
  
   
   if len(hand_count_list)>1 and all(isinstance(x, int) for x in hand_count_list): 
