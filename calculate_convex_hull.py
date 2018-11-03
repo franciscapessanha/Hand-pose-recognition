@@ -2,16 +2,36 @@ import cv2 as cv
 import numpy as np
 from sklearn.cluster import DBSCAN
 
-def get_convex_hulls(contours,frame_copy):
-  hulls = [cv.convexHull(contour,False) for contour in contours]
+def get_convex_hulls(contours):
+  '''Returns a list of convex hulls for a given list of contours
+  
+  Arguments:
+    contours {List} -- List of contours
+  
+  Returns:
+    List -- List of convex hulls
+    List -- List of convex hulls after being clustered
+  '''
+
+  hulls = [cv.convexHull(contour, False) for contour in contours]
   clustered_hulls_vertices = cluster_hulls_vertices(hulls, 20)
   return hulls, clustered_hulls_vertices
 
-def cluster_hulls_vertices(hulls, radius): 
+def cluster_hulls_vertices(hulls, radius):
+  '''Clusters a list of hulls vertices using a given radius
+  
+  Arguments:
+    hulls {List} -- List of hulls
+    radius {Int} -- Radius for grouping points in cluster
+  
+  Returns:
+    List -- List of hulls with clustered vertices
+  '''
+
   clustered_hulls_vertices = []
   for hull in hulls:
     points = np.array([[point.item(0), point.item(1)] for point in hull]) # converts hull to np array
-    clustering = DBSCAN(eps=radius, min_samples=1).fit(points)
+    clustering = DBSCAN(eps = radius, min_samples = 1).fit(points)
     clusters = [points[clustering.labels_ == i] for i in range(len(set(clustering.labels_)))]
     mean_point_cluster = []
     for cluster in clusters:
@@ -27,6 +47,16 @@ def cluster_hulls_vertices(hulls, radius):
   return clustered_hulls_vertices
 
 def get_indexed_hull(contour, hull):
+  '''Returns a list of indexes corresponding to the points in a contour from a given hull
+  
+  Arguments:
+    contour {List} -- Contour vertices
+    hull {List} -- Hull vertices
+  
+  Returns:
+    List -- Indexes of hull vertices in contour list
+  '''
+
   indexed_hull = []
   for hull_point in hull:
     for index, contour_point in enumerate(contour):
@@ -35,12 +65,22 @@ def get_indexed_hull(contour, hull):
 
   return np.array(indexed_hull)
 
-def calculate_convexity_defects(contours, clustered_hulls_vertices):
+def calculate_convexity_defects(contours, hulls):
+  '''Returns a list of convexity defects between a list of contours and hulls
+  
+  Arguments:
+    contours {List} -- List of contours
+    hulls {Hulls} -- List of hulls
+  
+  Returns:
+    List -- List of convexity defects
+  '''
+
   contours_with_defects = []
-  for contour, clustered_hull in zip(contours, clustered_hulls_vertices):
+  for contour, hull in zip(contours, hulls):
     contour_with_defects = []
 
-    indexed_hull = get_indexed_hull(contour, clustered_hull)
+    indexed_hull = get_indexed_hull(contour, hull)
 
     defects = cv.convexityDefects(contour, indexed_hull)
     if defects is None:
@@ -55,13 +95,18 @@ def calculate_convexity_defects(contours, clustered_hulls_vertices):
     contours_with_defects.append(contour_with_defects)
   return contours_with_defects
 
-def draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices,contours):
-  for i in range(len(contours)):
-    color = (0, 0, 255) # red - color for convex hull
-    cv.drawContours(frame_copy, hulls, i, color, 2, 8)
+def draw_hulls_and_vertices(frame, hulls, clustered_hulls):
+  '''Draws in frame a line for hulls, and a point in clustered hulls vertices
   
-  for hull in clustered_hulls_vertices:
+  Arguments:
+    frame {Mat} -- Frame to draw in
+    hulls {List} -- List of hulls
+    clustered_hulls {List} -- List of clustered hulls
+  '''
+
+  for i in range(len(hulls)):
+    cv.drawContours(frame, hulls, i, (0, 0, 255), 2, 8) # red - color for convex hull
+
+  for hull in clustered_hulls:
     for point in hull:
-      # ligth blue - color for convex hull vertices before convexity defects
-      cv.circle(frame_copy,(point.item(0), point.item(1)),12,(255,255,0),2) 
-      
+      cv.circle(frame,(point.item(0), point.item(1)),12,(255,255,0),2) # ligth blue - color for convex hull vertices before convexity defects

@@ -4,13 +4,10 @@ import numpy as np
 import math
 from calculate_mask import get_mask
 from display import *
-from calculate_fingers import get_fingers
 from helpers import is_int
 
-title = 'Hand Labeling v0.1'
 state = 'start'
 sample = None
-threshold = None
 frame_rate = 1
 video_frame_rate = 1
 
@@ -40,6 +37,7 @@ def format_frame(frame, video_capture_source):
 
   if type(video_capture_source) == int: # Video Capture Device is a web camera
     frame = cv.flip(frame, 1)
+
   new_size = get_new_size(frame)
   frame = cv.resize(frame, (new_size[1],new_size[0]))
   return frame
@@ -87,10 +85,10 @@ def enter_pressed(frame):
     frame {Mat} -- The current frame being labeled
   '''
 
-  global state, threshold, sample
+  global state, sample
   if state == 'start':
     cv.destroyWindow(title + ' - Press ENTER to sample')
-    sample, threshold = open_sample_window(frame)
+    sample = open_sample_window(frame)
     state = 'labeling'
   elif state == 'calibrating':
     cv.destroyWindow(calibrate_window_title)
@@ -104,10 +102,10 @@ def s_key_pressed(frame):
     frame {Mat} -- The current frame being labeled
   '''
 
-  global state, threshold, sample
+  global state, sample
   if state == 'labeling':
     cv.destroyWindow(title)
-    sample, threshold = open_sample_window(frame)
+    sample = open_sample_window(frame)
 
 def c_key_pressed():
   '''Handles what happens when the c key is pressed during program execution,
@@ -172,10 +170,7 @@ def handle_display(frame):
   if state == 'start':
     cv.imshow(title + ' - Press ENTER to sample', frame)
   elif state == 'labeling':
-    mask = get_mask(frame,threshold)
-    frame_copy, text  = get_fingers(mask,frame)
-    add_string_frame(frame_copy, text)
-    cv.imshow(title, frame_copy)
+    open_label_image_window(frame)
   elif state == 'calibrating':
     open_calibration_window(frame, sample)
 
@@ -199,12 +194,7 @@ def label_video(video_capture_source):
     frame = format_frame(frame, video_capture_source)
     if not handle_key(cv.waitKey(frame_rate), frame):
       break
- 
 
-    frame = format_frame(frame, video_capture_source)
-
-    if not handle_key(cv.waitKey(frame_rate), frame): 
-      break
     handle_display(frame)
 
   # When everything done, release the capture
@@ -227,12 +217,11 @@ def label_image(image_source):
       running = 1
     else:
       running = 0
-      handle_display(image)
 
     if not handle_key(cv.waitKey(running), image): 
       break
 
-    #handle_display(image)
+    handle_display(image)
 
 def handle_arguments():
   '''Handles arguments passed on by the user to the program,
