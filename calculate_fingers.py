@@ -29,8 +29,8 @@ def draw_defects(frame_copy, contours_with_defects,mask): #alterar - retirar cou
       triple2 = contour_with_defects[i - 1]
       new_triple = [triple1[1], triple2[2], triple2[1]]
       
-      if check_frame_edge(triple1, triple2, mask):
-        cv.circle(frame_copy,tuple(new_triple[1]),3,[0,255,0],3)
+      if check_mask_cutoff(triple1, triple2):
+        #cv.circle(frame_copy,tuple(new_triple[1]),3,[0,255,0],3)
         continue
       if filter_vertices_by_angle(new_triple,60):
         cv.circle(frame_copy,tuple(new_triple[1]),10,[0,0,255],2)
@@ -40,12 +40,10 @@ def draw_defects(frame_copy, contours_with_defects,mask): #alterar - retirar cou
     count_fingers_list.append(count_fingers)
   return count_fingers_list
 
-def check_frame_edge(triple1, triple2, frame): #não é a frame é a mask
-  distance_from_frame = 5
-  return (triple1[0][0] not in range(distance_from_frame, frame.shape[1] - distance_from_frame + 1) or
-    triple1[0][1] not in range(distance_from_frame, frame.shape[0] - distance_from_frame + 1) or
-    triple2[2][0] not in range(distance_from_frame, frame.shape[1] - distance_from_frame + 1) or
-    triple2[2][1] not in range(distance_from_frame, frame.shape[0] - distance_from_frame + 1))
+
+def check_mask_cutoff(triple1, triple2):
+  return (triple1[0][0] == triple2[2][0] and abs(triple1[0][1] - triple2[2][1]) > 60 or
+    triple1[0][1] == triple2[2][1] and abs(triple1[0][0] - triple2[2][0]) > 60)
 
 def filter_vertices_by_angle(triple,max_angle):
   a = linalg.norm(triple[0] - triple[2])
