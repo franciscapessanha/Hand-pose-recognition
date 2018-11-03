@@ -192,6 +192,8 @@ def label_video(video_capture_source):
   cap = cv.VideoCapture(video_capture_source)
   get_frame_rate(video_capture_source, cap)
 
+  check_saved_thresholds()
+
   while(True):
     # Capture frame-by-frame
     _, frame = cap.read()

@@ -12,7 +12,7 @@ sat_offset_low = 50
 
 thresholds = None
 
-title = 'Hand Labeling v0.1'
+title = 'Hand Labeling v0.3'
 calibrate_window_title = 'Calibrating - Press ENTER to confirm'
 
 def set_low_hue_threshold(value):
@@ -27,11 +27,6 @@ def set_low_sat_threshold(value):
 def set_high_sat_threshold(value):
   thresholds[1][1] = value
 
-def set_low_val_threshold(value):
-  thresholds[0][2] = value
-
-def set_high_val_threshold(value):
-  thresholds[1][2] = value
 
 def create_calibration_window():
   '''Creates the calibration and initiates the trackbars inside'''
@@ -41,14 +36,16 @@ def create_calibration_window():
   cv.createTrackbar('Hue High Threshold', calibrate_window_title, thresholds[1][0], 180, set_high_hue_threshold)
   cv.createTrackbar('Sat Low Threshold', calibrate_window_title, thresholds[0][1], 255, set_low_sat_threshold)
   cv.createTrackbar('Sat High Threshold', calibrate_window_title, thresholds[1][1], 255, set_high_sat_threshold)
-  cv.createTrackbar('Val Low Threshold', calibrate_window_title, thresholds[0][2], 255, set_low_val_threshold)
-  cv.createTrackbar('Val High Threshold', calibrate_window_title, thresholds[1][2], 255, set_high_val_threshold)
 
 def load_thresholds():
+  '''Loads the values of the mask thresholds from a local thresholds file'''
+
   global thresholds
   thresholds = load_list_from_file('thresholds')
 
 def save_thresholds():
+  '''Saves the values of the mask thresholds to a local thresholds file'''
+
   save_list_to_file(thresholds, 'thresholds')
 
 def get_mask_thresholds(sample):

@@ -12,11 +12,7 @@ def calculate_mask_thresholds(sample):
   '''
 
   sample = cv.cvtColor(sample, cv.COLOR_BGR2HSV)
-<<<<<<< HEAD
-
-=======
   
->>>>>>> aaffdfd05bd94f3194493b82e052ec2b470ed27e
   hsv_mean = cv.mean(sample)
   hsv_mean = [int(hsv_mean[0]), int(hsv_mean[1]), int(hsv_mean[2])]
 
@@ -28,10 +24,5 @@ def calculate_mask_thresholds(sample):
 
   hue_high_offset = hsv_mean[0] + hue_offset if hsv_mean[0] + hue_offset < 255 else 255
   sat_high_offset = hsv_mean[1] + sat_offset if hsv_mean[1] + sat_offset < 255 else 255
-<<<<<<< HEAD
-  val_high_offset = hsv_mean[2] + val_offset if hsv_mean[2] + val_offset < 255 else 255
-
-=======
   
->>>>>>> aaffdfd05bd94f3194493b82e052ec2b470ed27e
   return [[hue_low_offset, sat_low_offset, 0], [hue_high_offset, sat_high_offset, 255]]
