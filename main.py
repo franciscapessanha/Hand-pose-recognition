@@ -2,6 +2,7 @@ import cv2 as cv
 import sys
 import numpy as np
 import math
+import os.path
 from calculate_mask import get_mask
 from display import *
 from helpers import is_int
@@ -91,6 +92,7 @@ def enter_pressed(frame):
     sample = open_sample_window(frame)
     state = 'labeling'
   elif state == 'calibrating':
+    save_thresholds()
     cv.destroyWindow(calibrate_window_title)
     state = 'labeling'
 
@@ -132,6 +134,12 @@ def space_pressed():
     state = 'paused'
   elif state == 'paused':
     frame_rate = video_frame_rate
+    state = 'labeling'
+
+def check_saved_thresholds():
+  global state
+  if os.path.exists('thresholds'):
+    load_thresholds()
     state = 'labeling'
 
 def handle_key(key, frame):
@@ -209,6 +217,9 @@ def label_image(image_source):
   '''
 
   global state
+
+  check_saved_thresholds()
+
   while(True):
     image = cv.imread(image_source)
     image = format_image(image)
@@ -236,6 +247,9 @@ def handle_arguments():
     if is_int(sys.argv[1]):
       label_video(int(sys.argv[1]))
     else:
+      if not os.path.exists(sys.argv[1]):
+        print('File not found.')
+        return
       if sys.argv[1].endswith('.mp4'):
         label_video(sys.argv[1])
       elif sys.argv[1].endswith('.jpg') or sys.argv[1].endswith('.png'):

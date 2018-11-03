@@ -4,6 +4,7 @@ from sample_skin_color import calculate_mask_thresholds
 from calculate_mask import get_mask
 from calculate_contours import find_contours, crop_mask, fill_contours
 from calculate_fingers import get_fingers
+from helpers import save_list_to_file, load_list_from_file
 
 hue_offset = 60
 sat_offset_high = 60
@@ -43,6 +44,13 @@ def create_calibration_window():
   cv.createTrackbar('Val Low Threshold', calibrate_window_title, thresholds[0][2], 255, set_low_val_threshold)
   cv.createTrackbar('Val High Threshold', calibrate_window_title, thresholds[1][2], 255, set_high_val_threshold)
 
+def load_thresholds():
+  global thresholds
+  thresholds = load_list_from_file('thresholds')
+
+def save_thresholds():
+  save_list_to_file(thresholds, 'thresholds')
+
 def get_mask_thresholds(sample):
   '''Returns the mask threshold values from a given sample
   
@@ -79,11 +87,15 @@ def open_sample_window(frame):
     Mat -- The user selected samples
     List -- Low and high threshold values calculated from the sample
   '''
-
-  r = cv.selectROI(frame)
+  window_title = 'Select a large portion of the skin color'
+  r = cv.selectROI(window_title, frame, False)
   sample = frame[int(r[1]):int(r[1]+r[3]), int(r[0]):int(r[0]+r[2])]
-  cv.destroyWindow('ROI selector')
+  cv.destroyWindow(window_title)
+  if len(sample) == 0:
+    print('Please select a valid region')
+    return open_sample_window(frame)
   get_mask_thresholds(sample)
+  save_thresholds()
   return sample
 
 def open_label_image_window(frame):
