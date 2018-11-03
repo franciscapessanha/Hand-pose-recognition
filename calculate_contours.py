@@ -71,7 +71,6 @@ def crop_mask(contours, mask):
   Returns:
     Mat -- Mask with cropped wrist and arm
   '''
-
   for contour in contours:
     x,y,w,h= cv.boundingRect(contour)
     cropped_mask = mask[y:y+h,x:x+w]
@@ -79,12 +78,18 @@ def crop_mask(contours, mask):
     if h > w: #image is vertical
       if y == 0: right_side_up = False
       else: right_side_up = True
-      mask[y:y+h,x:x+w] = crop_vertical_mask(cropped_mask, right_side_up)
+      vertical_cropped_mask = crop_vertical_mask(cropped_mask, right_side_up)
+      if vertical_cropped_mask is None:
+        return mask
+      mask[y:y+h,x:x+w] = vertical_cropped_mask
     
     if w >= h: #image is horizontal
       if x == 0: pointing_right = True
       else: pointing_right = False
-      mask[y:y+h,x:x+w] = crop_horizontal_mask(cropped_mask, pointing_right)
+      horizontal_cropped_mask = crop_horizontal_mask(cropped_mask, pointing_right)
+      if horizontal_cropped_mask is None:
+        return mask
+      mask[y:y+h,x:x+w] = horizontal_cropped_mask
 
   return mask
 

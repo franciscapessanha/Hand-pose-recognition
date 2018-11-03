@@ -14,7 +14,7 @@ def get_mask(frame, thresholds):
 
   filtered_frame = filter_frame(frame)
   hsv_frame = cv.cvtColor(filtered_frame, cv.COLOR_BGR2HSV)
-  mask = cv.inRange(hsv_frame, *thresholds)
+  mask = cv.inRange(hsv_frame, tuple(thresholds[0]), tuple(thresholds[1]))
   mask = filter_mask(mask)
   return mask
 
