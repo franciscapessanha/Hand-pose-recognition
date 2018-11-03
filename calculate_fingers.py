@@ -9,7 +9,7 @@ def get_fingers(mask,original_frame):
   contours = get_contours(mask) 
   draw_contours(frame_copy,contours)
   hulls, clustered_hulls_vertices = get_convex_hulls(contours)
-  draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices)
+  #draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices)
   contours_with_defects = calculate_convexity_defects(contours,clustered_hulls_vertices)
   count_fingers_list = draw_defects(frame_copy,contours_with_defects, mask)
   text=identify_fingers(count_fingers_list,contours,mask,clustered_hulls_vertices)
@@ -19,10 +19,10 @@ def draw_defects(frame_copy, contours_with_defects,mask): #alterar - retirar cou
   count_fingers_list = []
   for contour_with_defects in contours_with_defects:
     count_fingers = 0
-    for new_triple in contour_with_defects:
+    #for new_triple in contour_with_defects:
       # blue lines - contour with defects
-      cv.line(frame_copy,tuple(new_triple[0]),tuple(new_triple[1]),[255,0,0],2)
-      cv.line(frame_copy,tuple(new_triple[1]),tuple(new_triple[2]),[255,0,0],2)
+      #cv.line(frame_copy,tuple(new_triple[0]),tuple(new_triple[1]),[255,0,0],2)
+      #cv.line(frame_copy,tuple(new_triple[1]),tuple(new_triple[2]),[255,0,0],2)
     for i in range(0,len(contour_with_defects)):
       #cv.circle(frame_copy,tuple(contour_with_defects[i][0]),10,[0,0,255],3)
       triple1 = contour_with_defects[i]
