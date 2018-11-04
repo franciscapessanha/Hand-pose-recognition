@@ -17,7 +17,7 @@ def calculate_mask_thresholds(sample):
   hsv_mean = [int(hsv_mean[0]), int(hsv_mean[1]), int(hsv_mean[2])]
 
   hue_offset = 10
-  sat_low_offset = 20
+  sat_low_offset = 25
   sat_high_offset = 50
 
   
