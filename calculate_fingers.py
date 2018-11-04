@@ -75,7 +75,7 @@ def draw_defects(frame_copy, contours_with_defects,mask,contours, orientation):
       if check_mask_cutoff(triple1, triple2):
         cv.circle(frame_copy,tuple(new_triple[1]),3,[0,255,0],3)
         continue
-
+      
       if filter_vertices_by_angle(new_triple,90):
         if(filter_vertices_by_distance([centroid_x,centroid_y], new_triple[1],orientation[j])):
 
@@ -114,7 +114,7 @@ def filter_vertices_by_angle(triple,max_angle):
   b = linalg.norm(triple[1] - triple[2])
   c = linalg.norm(triple[1] - triple[0])
   angle = np.arccos(((b ** 2 + c ** 2 - a ** 2) /(2 * b * c))) * (180 / np.pi)
-  
+  print(angle)
   if angle < max_angle:
     return True
 
@@ -154,29 +154,43 @@ def filter_vertices_by_distance(pt0, pt1, orientation):
   if orientation[0]==True:
     if orientation[1]==True: #vertical image with finger on the top border
       dist_max= find_max_value(abs(calculate_distance(pt0, [orientation[2][0],orientation[2][2]])),abs(calculate_distance(pt0, [orientation[2][0]+orientation[2][1],orientation[2][2]])))
-      if pt0[1] - pt1[1] < 0: 
+      distance=calculate_distance(pt0, pt1)
+      
+      if pt0[1]+orientation[2][3]/8 - pt1[1] < 0: # centroid (x0, y0 + w/10)
         distance=0
       else:
         distance=calculate_distance(pt0, pt1)
+        
     else: #vertical image with finger on the bottom border
       dist_max= find_max_value(abs(calculate_distance(pt0, [orientation[2][0],orientation[2][2]+orientation[2][3]])), abs(calculate_distance(pt0, [orientation[2][0]+orientation[2][1],orientation[2][2]+orientation[2][3]])))
-      if pt0[1] - pt1[1] > 0: 
+      distance=calculate_distance(pt0, pt1)
+      
+      if pt0[1] - orientation[2][3]/8 - pt1[1] > 0:  # centroid (x0, y0 - w/10)
         distance=0
       else:
         distance=calculate_distance(pt0, pt1)
+        
   else:
     if orientation[1]==True: #horizontal image with finger on the right border
       dist_max= find_max_value(abs(calculate_distance(pt0, [orientation[2][0]+orientation[2][1],orientation[2][2]])), abs(calculate_distance(pt0, [orientation[2][0]+orientation[2][1],orientation[2][2]+orientation[2][3]])))
-      if pt0[0] - pt1[0] > 0: 
+      distance=calculate_distance(pt0, pt1)
+      
+      if pt0[0] - (orientation[2][1])/8 - pt1[0] > 0: 
         distance=0
       else:
         distance=calculate_distance(pt0, pt1)
+        
     else: #horizontal image with finger on the left border
       dist_max= find_max_value(abs(calculate_distance(pt0, [orientation[2][0],orientation[2][2]])), abs(calculate_distance(pt0, [orientation[2][0],orientation[2][2]+orientation[2][3]])))
-      if pt0[0] - pt1[0] < 0: 
+      distance=calculate_distance(pt0, pt1)
+      
+      if pt0[0] + (orientation[2][1]/8) - pt1[0] < 0: 
         distance=0
       else:
         distance=calculate_distance(pt0, pt1)
+        
+  print(dist_max)
+  print(distance)
   if distance > dist_max_offset*dist_max:
     valid_distance=True
   return valid_distance
