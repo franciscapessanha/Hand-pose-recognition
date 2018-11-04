@@ -85,7 +85,7 @@ def crop_mask(contours, mask):
       right_side_up = not y == 0
       vertical_cropped_mask = crop_vertical_mask(cropped_mask, right_side_up)
       if vertical_cropped_mask is None:
-        return mask
+        return mask, finger_orientations
       mask[y:y + h, x:x + w] = vertical_cropped_mask
       finger_orientations.append([right_side_up])
     
@@ -93,7 +93,7 @@ def crop_mask(contours, mask):
       pointing_right = x == 0
       horizontal_cropped_mask = crop_horizontal_mask(cropped_mask, pointing_right)
       if horizontal_cropped_mask is None:
-        return mask
+        return mask, finger_orientations
       mask[y:y + h, x:x + w] = horizontal_cropped_mask
       finger_orientations.append([pointing_right]) 
   return mask, finger_orientations
