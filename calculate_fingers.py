@@ -26,6 +26,7 @@ def get_fingers(mask,original_frame):
   contours_with_defects = calculate_convexity_defects(contours,clustered_hulls_vertices)
   count_fingers_list = draw_defects(frame_copy,contours_with_defects, mask,orientation)
   text=identify_fingers(count_fingers_list,contours,orientation)
+
   return frame_copy, text 
 
 def draw_defects(frame_copy, contours_with_defects,mask,orientation): 
@@ -113,6 +114,7 @@ def filter_vertices_by_angle(triple,max_angle):
 
   return False
 
+<<<<<<< HEAD
 def calculate_distance(pt0, pt1):
    '''
   Returns the eucledian distance between the points pt0 and pt1
@@ -211,26 +213,53 @@ def identify_fingers(count_fingers_list,contours,orientation):
     ratio_width_height=orientation[j][2][1]/orientation[j][2][3] # width/height
     if count_fingers==1:
       if orientation[j][0]: #image is vertical
+=======
+def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices):
+  text = []
+  hand_count_list=[]
+
+  for count_fingers, contour, hull in zip(count_fingers_list, contours, clustered_hulls_vertices):
+    hand_gesture = ''
+    if count_fingers == 1:
+      x, y, w, h = cv.boundingRect(contour)
+      ratio_width_height = w / h
+      if h > w: #image is vertical
+>>>>>>> 22f2ab7e4836f9738357734c690dfec187862844
         if ratio_width_height > 0.65:
           text.append('ok')
         else:
           hand_count_list.append(1)
           text.append(str(count_fingers))
       else: #image is horizontal
+<<<<<<< HEAD
         if ratio_width_height < 1/0.65:
+=======
+        if ratio_width_height < 1 / 0.65:
+>>>>>>> 22f2ab7e4836f9738357734c690dfec187862844
            text.append('ok')
         else:
           text.append('pointer')
     
+<<<<<<< HEAD
     elif count_fingers==3:
       if orientation[j][0]: #image is vertical
+=======
+    elif count_fingers == 3:
+      x, y, w, h = cv.boundingRect(contour)
+      ratio_width_height = w / h
+      if h > w: #image is vertical
+>>>>>>> 22f2ab7e4836f9738357734c690dfec187862844
         if ratio_width_height > 0.65:
           text.append('all right')
         else:
           hand_count_list.append(3)
           text.append(str(count_fingers))
       else: #image is horizontal
+<<<<<<< HEAD
         if ratio_width_height < 1/0.65:
+=======
+        if ratio_width_height < 1 / 0.65:
+>>>>>>> 22f2ab7e4836f9738357734c690dfec187862844
            text.append('all right')
         else:
           hand_count_list.append(3)
@@ -239,15 +268,7 @@ def identify_fingers(count_fingers_list,contours,orientation):
     else:
       hand_count_list.append(count_fingers)
       text.append(str(count_fingers))
- 
   
-  if len(hand_count_list)>1 and all(isinstance(x, int) for x in hand_count_list): 
-    text=[]
-    sum_fingers=sum(hand_count_list)
-    text.append(str(sum_fingers))
-  
-  text.reverse()
-  text=' '.join(text)
   return text
 
   
