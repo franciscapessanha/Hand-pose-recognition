@@ -23,20 +23,21 @@ def get_fingers(mask,original_frame):
   hulls, clustered_hulls_vertices = get_convex_hulls(contours)
   #draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices)
   contours_with_defects = calculate_convexity_defects(contours,clustered_hulls_vertices)
-  count_fingers_list = draw_defects(frame_copy,contours_with_defects, mask,orientation)
-  text=identify_fingers(count_fingers_list,contours,orientation)
+  count_fingers_list = draw_defects(frame_copy,contours_with_defects, mask,contours,orientation)
+  text=identify_fingers(count_fingers_list,orientation)
 
   return frame_copy, text 
 
-def draw_defects(frame_copy, contours_with_defects,mask,orientation): 
+def draw_defects(frame_copy, contours_with_defects,mask,contours, orientation): 
   '''Returns the number of fingers of each hand after filtering the convexity defects. 
   Shows the detected fingertips on the original frame
   
   Arguments:
     
     frame_copy {Mat} --  Copy of the original frame
-    contours {List} -- List of contours from mask
+    contours_with_defects {List} -- List of convexity defects
     mask {Mat} -- Filtered and croped binary hand mask from a given frame
+    contours {List} -- List of contours from mask
     orientation {List} -- composed by 3 elements: vertical/horizontal orientation (boolean), fingers direction (boolean)and 
       an array ([x,w,y,h]) of x and y coordinates of top-left border, width and height of the hand 
   
@@ -45,12 +46,18 @@ def draw_defects(frame_copy, contours_with_defects,mask,orientation):
   '''
 
   count_fingers_list = []
-  for contour_with_defects,j in zip(contours_with_defects,range(0,len(orientation))):
+  for contour_with_defects,contour, j in zip(contours_with_defects,contours,range(0,len(orientation))):
     c=np.asarray(np.vstack(contour_with_defects))
     M = cv.moments(c)
     centroid_x=int(M['m10']/M['m00'])
     centroid_y=int(M['m01']/M['m00'])
     
+    x,y,w,h= cv.boundingRect(contour)
+    cv.rectangle(frame_copy,(x,y),(x+w,y+h),(0,255,0),2)
+    if h > w: orientation[j].insert(0, True)
+    else: orientation[j].insert(0, False)
+    orientation[j].append([x,w,y,h])
+
     count_fingers = 0
 
     '''
@@ -190,13 +197,12 @@ def find_max_value(a,b):
   else: 
     return b
 
-def identify_fingers(count_fingers_list,contours,orientation):
+def identify_fingers(count_fingers_list,orientation):
   '''Returns the text displayed on the bottom of the original frame
   
   Arguments:
     
     count_fingers {List} --  Number of fingers of each hand
-    contours {List} -- List of contours from mask
     orientation {List} -- composed by 3 elements: vertical/horizontal orientation (boolean), fingers direction (boolean)and 
       an array ([x,w,y,h]) of x and y coordinates of top-left border, width and height of the hand 
   
@@ -209,11 +215,11 @@ def identify_fingers(count_fingers_list,contours,orientation):
   for count_fingers,j in zip(count_fingers_list,range(0,len(orientation))):
     hand_gesture=''
     ratio_width_height=orientation[j][2][1]/orientation[j][2][3] # width/height
-    print(ratio_width_height)
     if count_fingers==1:
+
       if orientation[j][0]: #image is vertical
         if ratio_width_height > 0.65:
-          if orientation[j][0]==True: #thumbs up
+          if orientation[j][1]==True: #thumbs up
             text.append('ok')
           else: #thumbs down
             text.append('not ok')
@@ -221,16 +227,13 @@ def identify_fingers(count_fingers_list,contours,orientation):
           hand_count_list.append(1)
           text.append(str(count_fingers))
       else: #image is horizontal
-        if ratio_width_height >= 1 / 0.65:
-          if orientation[j][0]==True: #pointing right
+          if orientation[j][1]==True: #pointing right
             text.append('pointing right')
           else: #pointing left
             text.append('pointing left')
-        else:
-          text.append(str(count_fingers))
     
     elif count_fingers==3:
-      if orientation[j][0] and orientation[j][0]==True: #image is vertical and three fingers up
+      if orientation[j][0] and orientation[j][1]==True: #image is vertical and three fingers up
         if ratio_width_height > 0.65:
           text.append('all right')
         else: #image is vertical and three fingers down
@@ -243,6 +246,7 @@ def identify_fingers(count_fingers_list,contours,orientation):
     else:
       hand_count_list.append(count_fingers)
       text.append(str(count_fingers))
-  
+  text=text[::-1]
+
   return text
 
