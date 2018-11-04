@@ -29,6 +29,4 @@ def calculate_mask_thresholds(sample):
   sat_high_offset = hsv_mean[1] + sat_offset if hsv_mean[1] + sat_offset < 255 else 255
   val_high_offset = hsv_mean[2] + val_offset if hsv_mean[2] + val_offset < 255 else 255
   
-  print([hue_low_offset, sat_low_offset, val_low_offset])
-  print([hue_high_offset, sat_high_offset, val_high_offset])
   return [[hue_low_offset, sat_low_offset, 0], [hue_high_offset, sat_high_offset, 255]]

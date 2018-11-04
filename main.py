@@ -217,11 +217,13 @@ def label_image(image_source):
       running = 1
     else:
       running = 0
+    
+    handle_display(image)
 
     if not handle_key(cv.waitKey(running), image): 
       break
 
-    handle_display(image)
+    
 
 def handle_arguments():
   '''Handles arguments passed on by the user to the program,
