@@ -71,7 +71,7 @@ def open_calibration_window(frame, sample):
   mask = get_mask(frame, thresholds)
   contours = find_contours(mask)
   mask = fill_contours(contours, mask)
-  mask = crop_mask(contours, mask)
+  mask, _ = crop_mask(contours, mask)
   cv.imshow(calibrate_window_title, mask)
 
 def open_sample_window(frame):

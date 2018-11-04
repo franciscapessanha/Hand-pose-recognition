@@ -50,8 +50,8 @@ def fill_contours(contours, mask):
   new_mask = np.zeros(np.asarray(mask).shape, np.uint8)
   for contour in contours:
     np.asarray(contours)
-    cv.fillPoly(new_mask, pts =np.asarray(contours), color=(255,255,255))
-  return mask
+    cv.fillPoly(new_mask, pts = np.asarray(contours), color=(255,255,255))
+  return new_mask
 
 def draw_contours(frame, contours):
   '''Draws contours in green in a given frame
@@ -97,7 +97,7 @@ def crop_mask(contours, mask):
         return mask
       mask[y:y+h,x:x+w] = horizontal_cropped_mask
       finger_orientation.append([pointing_right]) 
-  return mask,finger_orientation
+  return mask, finger_orientation
 
 def crop_vertical_mask(mask, right_side_up):
   '''Crops a hand mask by the wrist, where the hand is vertical
