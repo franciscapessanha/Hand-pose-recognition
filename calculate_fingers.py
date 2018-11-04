@@ -19,7 +19,6 @@ def get_fingers(mask,original_frame):
 
   frame_copy = np.copy(original_frame)
   contours,orientation = get_contours(mask)
-  print(type(orientation))
   draw_contours(frame_copy,contours)
   hulls, clustered_hulls_vertices = get_convex_hulls(contours)
   #draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices)
@@ -115,7 +114,7 @@ def filter_vertices_by_angle(triple,max_angle):
   return False
 
 def calculate_distance(pt0, pt1):
-   '''
+  '''
   Returns the eucledian distance between the points pt0 and pt1
 
   Arguments:
@@ -125,8 +124,8 @@ def calculate_distance(pt0, pt1):
     
   Returns:
     Float -- eucledian distance between the points pt0 and pt1
-    '''
-   return math.sqrt((pt0[0]-pt1[0])**2 + (pt0[1] - pt1[1])**2)
+  '''
+  return math.sqrt((pt0[0]-pt1[0])**2 + (pt0[1] - pt1[1])**2)
 
 def filter_vertices_by_distance(pt0, pt1, orientation):
   '''
@@ -165,9 +164,9 @@ def filter_vertices_by_distance(pt0, pt1, orientation):
         distance=0
       else:
         distance=calculate_distance(pt0, pt1)
-    else:
+    else: #horizontal image with finger on the left border
       dist_max= find_max_value(abs(calculate_distance(pt0, [orientation[2][0],orientation[2][2]])), abs(calculate_distance(pt0, [orientation[2][0],orientation[2][2]+orientation[2][3]])))
-      if pt0[0] - pt1[0] < 0: #horizontal image with finger on the left border
+      if pt0[0] - pt1[0] < 0: 
         distance=0
       else:
         distance=calculate_distance(pt0, pt1)
@@ -210,32 +209,36 @@ def identify_fingers(count_fingers_list,contours,orientation):
   for count_fingers,j in zip(count_fingers_list,range(0,len(orientation))):
     hand_gesture=''
     ratio_width_height=orientation[j][2][1]/orientation[j][2][3] # width/height
+    print(ratio_width_height)
     if count_fingers==1:
       if orientation[j][0]: #image is vertical
         if ratio_width_height > 0.65:
-          text.append('ok')
+          if orientation[j][0]==True: #thumbs up
+            text.append('ok')
+          else: #thumbs down
+            text.append('not ok')
         else:
           hand_count_list.append(1)
           text.append(str(count_fingers))
       else: #image is horizontal
-        if ratio_width_height < 1 / 0.65:
-           text.append('ok')
+        if ratio_width_height >= 1 / 0.65:
+          if orientation[j][0]==True: #pointing right
+            text.append('pointing right')
+          else: #pointing left
+            text.append('pointing left')
         else:
-          text.append('pointer')
+          text.append(str(count_fingers))
     
     elif count_fingers==3:
-      if orientation[j][0]: #image is vertical
+      if orientation[j][0] and orientation[j][0]==True: #image is vertical and three fingers up
         if ratio_width_height > 0.65:
           text.append('all right')
-        else:
+        else: #image is vertical and three fingers down
           hand_count_list.append(3)
           text.append(str(count_fingers))
       else: #image is horizontal
-        if ratio_width_height < 1 / 0.65:
-           text.append('all right')
-        else:
-          hand_count_list.append(3)
-          text.append(str(count_fingers))
+        hand_count_list.append(3)
+        text.append(str(count_fingers))
    
     else:
       hand_count_list.append(count_fingers)
@@ -243,4 +246,3 @@ def identify_fingers(count_fingers_list,contours,orientation):
   
   return text
 
-  
