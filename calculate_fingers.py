@@ -114,18 +114,6 @@ def filter_vertices_by_angle(triple,max_angle):
 
   return False
 
-<<<<<<< HEAD
-def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices):
-  text = []
-  hand_count_list=[]
-
-  for count_fingers, contour, hull in zip(count_fingers_list, contours, clustered_hulls_vertices):
-    hand_gesture = ''
-    if count_fingers == 1:
-      x, y, w, h = cv.boundingRect(contour)
-      ratio_width_height = w / h
-      if h > w: #image is vertical
-=======
 def calculate_distance(pt0, pt1):
    '''
   Returns the eucledian distance between the points pt0 and pt1
@@ -138,7 +126,7 @@ def calculate_distance(pt0, pt1):
   Returns:
     Float -- eucledian distance between the points pt0 and pt1
     '''
-  return math.sqrt((pt0[0]-pt1[0])**2 + (pt0[1] - pt1[1])**2)
+   return math.sqrt((pt0[0]-pt1[0])**2 + (pt0[1] - pt1[1])**2)
 
 def filter_vertices_by_distance(pt0, pt1, orientation):
   '''
@@ -224,7 +212,6 @@ def identify_fingers(count_fingers_list,contours,orientation):
     ratio_width_height=orientation[j][2][1]/orientation[j][2][3] # width/height
     if count_fingers==1:
       if orientation[j][0]: #image is vertical
->>>>>>> 7d7a1455bb30f525c8c38fc3fbdd1a759c16839a
         if ratio_width_height > 0.65:
           text.append('ok')
         else:
@@ -236,15 +223,8 @@ def identify_fingers(count_fingers_list,contours,orientation):
         else:
           text.append('pointer')
     
-<<<<<<< HEAD
-    elif count_fingers == 3:
-      x, y, w, h = cv.boundingRect(contour)
-      ratio_width_height = w / h
-      if h > w: #image is vertical
-=======
     elif count_fingers==3:
       if orientation[j][0]: #image is vertical
->>>>>>> 7d7a1455bb30f525c8c38fc3fbdd1a759c16839a
         if ratio_width_height > 0.65:
           text.append('all right')
         else:
