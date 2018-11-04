@@ -10,15 +10,16 @@ def get_contours(mask):
   
   Returns:
     List -- List with all the sorted contours from the mask
+    List -- List of booleans containing contour orientation information
   '''
 
   contours = find_contours(mask)
   mask = fill_contours(contours, mask)
-  mask,orientation = crop_mask(contours, mask)
+  mask, orientations = crop_mask(contours, mask)
   contours = find_contours(mask)
-  contours=sort_contours(contours)
+  contours = sort_contours(contours)
   mask = fill_contours(contours, mask)
-  return contours,orientation
+  return contours, orientations
 
 def find_contours(mask):
   '''Returns all contours for a given mask that are bigger then 50% of the biggest contour, sorted by size
@@ -50,7 +51,7 @@ def fill_contours(contours, mask):
   new_mask = np.zeros(np.asarray(mask).shape, np.uint8)
   for contour in contours:
     np.asarray(contours)
-    cv.fillPoly(new_mask, pts = np.asarray(contours), color=(255,255,255))
+    cv.fillPoly(new_mask, pts = np.asarray(contours), color = (255,255,255))
   return new_mask
 
 def draw_contours(frame, contours):
@@ -61,7 +62,7 @@ def draw_contours(frame, contours):
     contours {List} -- List of contours to draw
   '''
 
-  cv.drawContours(frame, contours,-1,(0,255,0),2) # green - color for contours 
+  cv.drawContours(frame, contours, -1, (0, 255, 0), 2) # green - color for contours 
 
 def crop_mask(contours, mask):
   '''Crops a hand mask by the wrist
@@ -72,32 +73,30 @@ def crop_mask(contours, mask):
   
   Returns:
     Mat -- Mask with cropped wrist and arm
-    List -- finger_orientation is a list of booleans:
+    List -- finger_orientations is a list of booleans:
       True if fingers up or pointing right), False if finger down or pointing left
   '''
-  finger_orientation=[]
+  finger_orientations = []
   for contour in contours:
-    x,y,w,h= cv.boundingRect(contour)
-    cropped_mask = mask[y:y+h,x:x+w]
+    x, y, w, h= cv.boundingRect(contour)
+    cropped_mask = mask[y:y + h, x:x + w]
     
     if h > w: #image is vertical
-      if y == 0: right_side_up = False
-      else: right_side_up = True
+      right_side_up = not y == 0
       vertical_cropped_mask = crop_vertical_mask(cropped_mask, right_side_up)
       if vertical_cropped_mask is None:
         return mask
-      mask[y:y+h,x:x+w] = vertical_cropped_mask
-      finger_orientation.append([right_side_up])
+      mask[y:y + h, x:x + w] = vertical_cropped_mask
+      finger_orientations.append([right_side_up])
     
     if w >= h: #image is horizontal
-      if x == 0: pointing_right = True
-      else: pointing_right = False
+      pointing_right = x == 0
       horizontal_cropped_mask = crop_horizontal_mask(cropped_mask, pointing_right)
       if horizontal_cropped_mask is None:
         return mask
-      mask[y:y+h,x:x+w] = horizontal_cropped_mask
-      finger_orientation.append([pointing_right]) 
-  return mask, finger_orientation
+      mask[y:y + h, x:x + w] = horizontal_cropped_mask
+      finger_orientations.append([pointing_right]) 
+  return mask, finger_orientations
 
 def crop_vertical_mask(mask, right_side_up):
   '''Crops a hand mask by the wrist, where the hand is vertical
@@ -147,30 +146,30 @@ def crop_horizontal_mask(mask, pointing_right):
   Returns:
     Mat -- Mask with cropped wrist and arm
   '''
-  mask_col_sum = np.sum(mask,axis=0)
+  mask_col_sum = np.sum(mask, axis = 0)
   if pointing_right:
     left_to_right = mask_col_sum 
-    for i in range(0,len(left_to_right)-20):
-      if left_to_right[i+20] > 1.05*left_to_right[i]:
+    for i in range(0, len(left_to_right) - 20):
+      if left_to_right[i + 20] > 1.05 * left_to_right[i]:
         index_in_mask = i
-        non_zero_indexes = np.argwhere(mask[:,index_in_mask-1])
-        first  = non_zero_indexes[0]
-        last  = non_zero_indexes[-1]
-        for y in range(np.int(first),np.int(last)):
-          mask[y,index_in_mask-1] = 1
-        mask[0:mask.shape[0],0:index_in_mask] = 0
+        non_zero_indexes = np.argwhere(mask[:, index_in_mask - 1])
+        first = non_zero_indexes[0]
+        last = non_zero_indexes[-1]
+        for y in range(np.int(first), np.int(last)):
+          mask[y, index_in_mask - 1] = 1
+        mask[0:mask.shape[0], 0:index_in_mask] = 0
         return mask
   else:
     right_to_left = list(reversed(mask_col_sum))
-    for i in range(0,len(right_to_left)-20):
-      if right_to_left[i+20] > 1.05*right_to_left[i]:
-        index_in_mask = mask.shape[1]-i
-        non_zero_indexes = np.argwhere(mask[:,index_in_mask-1])
+    for i in range(0, len(right_to_left) - 20):
+      if right_to_left[i + 20] > 1.05 * right_to_left[i]:
+        index_in_mask = mask.shape[1] - i
+        non_zero_indexes = np.argwhere(mask[:, index_in_mask - 1])
         first = non_zero_indexes[0]
         last = non_zero_indexes[-1]
-        for y in range(np.int(first),np.int(last)):
-          mask[y,index_in_mask-1] = 1
-        mask[0:mask.shape[0],index_in_mask:mask.shape[1]] = 0
+        for y in range(np.int(first), np.int(last)):
+          mask[y, index_in_mask - 1] = 1
+        mask[0:mask.shape[0], index_in_mask:mask.shape[1]] = 0
         return mask
 
 def sort_contours(contours, method=True):
@@ -184,11 +183,9 @@ def sort_contours(contours, method=True):
     List -- List with all the sorted contours 
   '''
   # initialize the reverse flag and sort index
-  i = 0
-
-  if method == False: i = 1
+  i = 0 if method else 1
 
   boundingBoxes = [cv.boundingRect(contour) for contour in contours]
-  (contours, boundingBoxes) = zip(*sorted(zip(contours, boundingBoxes), key=lambda b:b[1][i], reverse=method))
+  (contours, boundingBoxes) = zip(*sorted(zip(contours, boundingBoxes), key = lambda b:b[1][i], reverse = method))
 
   return contours
