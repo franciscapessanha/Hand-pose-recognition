@@ -107,7 +107,7 @@ def open_label_image_window(frame):
   if len(text) > 0:
     add_string_to_frame(frame_copy, text[0], True)
     if len(text) > 1:
-      add_string_to_frame(frame_copy, text[0], False)
+      add_string_to_frame(frame_copy, text[1], False)
   cv.imshow(title, frame_copy)
 
 
