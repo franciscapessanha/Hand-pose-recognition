@@ -124,8 +124,8 @@ def calculate_distance(pt0, pt1):
     
   Returns:
     Float -- eucledian distance between the points pt0 and pt1
-    '''
-   return math.sqrt((pt0[0]-pt1[0])**2 + (pt0[1] - pt1[1])**2)
+  '''
+  return math.sqrt((pt0[0]-pt1[0])**2 + (pt0[1] - pt1[1])**2)
 
 def filter_vertices_by_distance(pt0, pt1, orientation):
   '''
