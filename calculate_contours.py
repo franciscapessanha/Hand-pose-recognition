@@ -97,7 +97,7 @@ def crop_mask(contours, mask):
         return mask
       mask[y:y+h,x:x+w] = horizontal_cropped_mask
       finger_orientation.append([pointing_right]) 
-  return mask,orientation_info
+  return mask,finger_orientation
 
 def crop_vertical_mask(mask, right_side_up):
   '''Crops a hand mask by the wrist, where the hand is vertical
