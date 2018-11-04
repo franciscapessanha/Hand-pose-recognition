@@ -9,13 +9,14 @@ def get_contours(mask):
     mask {Mat} -- Binary mask to calculate contours
   
   Returns:
-    List -- List with all the contours from the mask
+    List -- List with all the sorted contours from the mask
   '''
 
   contours = find_contours(mask)
   mask = fill_contours(contours, mask)
   mask,orientation = crop_mask(contours, mask)
   contours = find_contours(mask)
+  contours=sort_contours(contours)
   mask = fill_contours(contours, mask)
   return contours,orientation
 
@@ -32,6 +33,7 @@ def find_contours(mask):
   _ , contours, _ = cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
   contours = sorted(contours, key = cv.contourArea, reverse = True) 
   contours = [contours[i] for i in range(len(contours)) if cv.contourArea(contours[i]) > 0.50 * cv.contourArea(contours[0])]
+
   return contours
 
 def fill_contours(contours, mask):
@@ -70,11 +72,10 @@ def crop_mask(contours, mask):
   
   Returns:
     Mat -- Mask with cropped wrist and arm
-    List -- orientation is composed by 3 elements: 
-      vertical/horizontal orientation (boolean), fingers direction (boolean), 
-      array ([x,w,y,h]) of x and y coordinates of top-left border, width and height of the hand
+    List -- finger_orientation is a list of booleans:
+      True if fingers up or pointing right), False if finger down or pointing left
   '''
-  orientation_info=[]
+  finger_orientation=[]
   for contour in contours:
     x,y,w,h= cv.boundingRect(contour)
     cropped_mask = mask[y:y+h,x:x+w]
@@ -86,7 +87,7 @@ def crop_mask(contours, mask):
       if vertical_cropped_mask is None:
         return mask
       mask[y:y+h,x:x+w] = vertical_cropped_mask
-      orientation_info.append([True, right_side_up,[x,w,y,h]])#acrescentei
+      finger_orientation.append([right_side_up])
     
     if w >= h: #image is horizontal
       if x == 0: pointing_right = True
@@ -95,8 +96,7 @@ def crop_mask(contours, mask):
       if horizontal_cropped_mask is None:
         return mask
       mask[y:y+h,x:x+w] = horizontal_cropped_mask
-      orientation_info.append([False,pointing_right,[x,w,y,h]]) #acrescentei
-  
+      finger_orientation.append([pointing_right]) 
   return mask,orientation_info
 
 def crop_vertical_mask(mask, right_side_up):
@@ -172,3 +172,23 @@ def crop_horizontal_mask(mask, pointing_right):
           mask[y,index_in_mask-1] = 1
         mask[0:mask.shape[0],index_in_mask:mask.shape[1]] = 0
         return mask
+
+def sort_contours(contours, method=True):
+  '''Returns the contours sorted from top to bottom/left to right or from bottom to top/right to left depending if
+  the method is True or False,respectively
+  
+  Arguments:
+    contours {List} -- List with all the unsorted contours 
+  
+  Returns:
+    List -- List with all the sorted contours 
+  '''
+  # initialize the reverse flag and sort index
+  i = 0
+
+  if method == False: i = 1
+
+  boundingBoxes = [cv.boundingRect(contour) for contour in contours]
+  (contours, boundingBoxes) = zip(*sorted(zip(contours, boundingBoxes), key=lambda b:b[1][i], reverse=method))
+
+  return contours
