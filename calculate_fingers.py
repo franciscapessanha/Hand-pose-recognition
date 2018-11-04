@@ -114,7 +114,7 @@ def filter_vertices_by_angle(triple,max_angle):
   b = linalg.norm(triple[1] - triple[2])
   c = linalg.norm(triple[1] - triple[0])
   angle = np.arccos(((b ** 2 + c ** 2 - a ** 2) /(2 * b * c))) * (180 / np.pi)
-  print(angle)
+
   if angle < max_angle:
     return True
 
@@ -189,8 +189,7 @@ def filter_vertices_by_distance(pt0, pt1, orientation):
       else:
         distance=calculate_distance(pt0, pt1)
         
-  print(dist_max)
-  print(distance)
+
   if distance > dist_max_offset*dist_max:
     valid_distance=True
   return valid_distance
