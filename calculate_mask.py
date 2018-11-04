@@ -27,9 +27,7 @@ def filter_frame(frame):
   Returns:
     Mat -- The filtered frame
   '''
-
-  adjusted_frame = adjust_gamma(frame, gamma = 1.5) # reduzir as sombras - torna tudo mais homogeneo
-  filtered_frame = cv.medianBlur(adjusted_frame, 9)
+  filtered_frame = cv.medianBlur(frame, 9)
   return filtered_frame
 
 def filter_mask(mask):
@@ -46,20 +44,3 @@ def filter_mask(mask):
   mask = cv.dilate(mask,kernel_ellipse, iterations = 2)
   mask = cv.medianBlur(mask, 9)
   return mask
-
-def adjust_gamma(frame, gamma = 1.0):
-  '''Applies a non linear grey level transformation
-  
-  Arguments:
-    frame {Frame} -- The frame where the equalization is applied
-  
-  Keyword Arguments:
-    gamma {float} -- transformation constant (default: {1.0})
-  
-  Returns:
-    Mat -- Frame with transformation applied
-  '''
-
-  invGamma = 1.0 / gamma
-  table = np.array([((i / 255.0) ** invGamma) * 255 for i in np.arange(0, 256)])
-  return cv.LUT(frame.astype(np.uint8), table.astype(np.uint8))
