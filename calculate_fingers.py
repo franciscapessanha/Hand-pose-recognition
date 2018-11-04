@@ -114,6 +114,7 @@ def filter_vertices_by_angle(triple,max_angle):
 
   return False
 
+<<<<<<< HEAD
 def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices):
   text = []
   hand_count_list=[]
@@ -124,6 +125,106 @@ def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices)
       x, y, w, h = cv.boundingRect(contour)
       ratio_width_height = w / h
       if h > w: #image is vertical
+=======
+def calculate_distance(pt0, pt1):
+   '''
+  Returns the eucledian distance between the points pt0 and pt1
+
+  Arguments:
+    
+    pt0 {List} -- Coordinates of the point pt0
+    pt1 {List} -- Coordinates of the point pt1
+    
+  Returns:
+    Float -- eucledian distance between the points pt0 and pt1
+    '''
+  return math.sqrt((pt0[0]-pt1[0])**2 + (pt0[1] - pt1[1])**2)
+
+def filter_vertices_by_distance(pt0, pt1, orientation):
+  '''
+  Returns True if the distance between the hand's centroid and hand's fingertip is acceptable within a defined range
+  
+  Arguments:
+    
+    pt0 {List} -- Coordinates of the centroid of the cropped hand
+    pt1 {List} -- Coordinates of the detected fingertip of the cropped hand
+    orientation {List} -- composed by 3 elements: vertical/horizontal orientation (boolean), fingers direction (boolean)and 
+      an array ([x,w,y,h]) of x and y coordinates of top-left border, width and height of the hand 
+  
+  Returns:
+    Boolean -- True if the distance between the hand's centroid and fingertip is valid
+    '''
+  valid_distance=False
+  dist_max_offset=0.55
+
+  if orientation[0]==True:
+    if orientation[1]==True: #vertical image with finger on the top border
+      dist_max= find_max_value(abs(calculate_distance(pt0, [orientation[2][0],orientation[2][2]])),abs(calculate_distance(pt0, [orientation[2][0]+orientation[2][1],orientation[2][2]])))
+      if pt0[1] - pt1[1] < 0: 
+        distance=0
+      else:
+        distance=calculate_distance(pt0, pt1)
+    else: #vertical image with finger on the bottom border
+      dist_max= find_max_value(abs(calculate_distance(pt0, [orientation[2][0],orientation[2][2]+orientation[2][3]])), abs(calculate_distance(pt0, [orientation[2][0]+orientation[2][1],orientation[2][2]+orientation[2][3]])))
+      if pt0[1] - pt1[1] > 0: 
+        distance=0
+      else:
+        distance=calculate_distance(pt0, pt1)
+  else:
+    if orientation[1]==True: #horizontal image with finger on the right border
+      dist_max= find_max_value(abs(calculate_distance(pt0, [orientation[2][0]+orientation[2][1],orientation[2][2]])), abs(calculate_distance(pt0, [orientation[2][0]+orientation[2][1],orientation[2][2]+orientation[2][3]])))
+      if pt0[0] - pt1[0] > 0: 
+        distance=0
+      else:
+        distance=calculate_distance(pt0, pt1)
+    else:
+      dist_max= find_max_value(abs(calculate_distance(pt0, [orientation[2][0],orientation[2][2]])), abs(calculate_distance(pt0, [orientation[2][0],orientation[2][2]+orientation[2][3]])))
+      if pt0[0] - pt1[0] < 0: #horizontal image with finger on the left border
+        distance=0
+      else:
+        distance=calculate_distance(pt0, pt1)
+  if distance > dist_max_offset*dist_max:
+    valid_distance=True
+  return valid_distance
+
+def find_max_value(a,b): 
+  '''
+  Returns the maximum value of two given integers/float
+  
+  Arguments:
+    
+    a,b {Integers/Float} --  Values
+  
+  Returns:
+    Integer/Float -- Highest value of the input
+  '''
+  if a>b:
+    return a
+  else: 
+    return b
+
+def identify_fingers(count_fingers_list,contours,orientation):
+  '''Returns the text displayed on the bottom of the original frame
+  
+  Arguments:
+    
+    count_fingers {List} --  Number of fingers of each hand
+    contours {List} -- List of contours from mask
+    orientation {List} -- composed by 3 elements: vertical/horizontal orientation (boolean), fingers direction (boolean)and 
+      an array ([x,w,y,h]) of x and y coordinates of top-left border, width and height of the hand 
+  
+  Returns:
+    String -- Number of fingers/hand gesture of each hand present on the original frame
+  '''
+  text=[]
+  hand_count_list=[]
+
+  for count_fingers,j in zip(count_fingers_list,range(0,len(orientation))):
+    hand_gesture=''
+    ratio_width_height=orientation[j][2][1]/orientation[j][2][3] # width/height
+    if count_fingers==1:
+      if orientation[j][0]: #image is vertical
+>>>>>>> 7d7a1455bb30f525c8c38fc3fbdd1a759c16839a
         if ratio_width_height > 0.65:
           text.append('ok')
         else:
@@ -135,10 +236,15 @@ def identify_fingers(count_fingers_list,contours,mask, clustered_hulls_vertices)
         else:
           text.append('pointer')
     
+<<<<<<< HEAD
     elif count_fingers == 3:
       x, y, w, h = cv.boundingRect(contour)
       ratio_width_height = w / h
       if h > w: #image is vertical
+=======
+    elif count_fingers==3:
+      if orientation[j][0]: #image is vertical
+>>>>>>> 7d7a1455bb30f525c8c38fc3fbdd1a759c16839a
         if ratio_width_height > 0.65:
           text.append('all right')
         else:
