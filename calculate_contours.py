@@ -14,10 +14,10 @@ def get_contours(mask):
 
   contours = find_contours(mask)
   mask = fill_contours(contours, mask)
-  mask = crop_mask(contours, mask)
+  mask,orientation = crop_mask(contours, mask)
   contours = find_contours(mask)
   mask = fill_contours(contours, mask)
-  return contours
+  return contours,orientation
 
 def find_contours(mask):
   '''Returns all contours for a given mask that are bigger then 50% of the biggest contour, sorted by size
@@ -70,7 +70,11 @@ def crop_mask(contours, mask):
   
   Returns:
     Mat -- Mask with cropped wrist and arm
+    List -- orientation is composed by 3 elements: 
+      vertical/horizontal orientation (boolean), fingers direction (boolean), 
+      array ([x,w,y,h]) of x and y coordinates of top-left border, width and height of the hand
   '''
+  orientation_info=[]
   for contour in contours:
     x,y,w,h= cv.boundingRect(contour)
     cropped_mask = mask[y:y+h,x:x+w]
@@ -82,6 +86,7 @@ def crop_mask(contours, mask):
       if vertical_cropped_mask is None:
         return mask
       mask[y:y+h,x:x+w] = vertical_cropped_mask
+      orientation_info.append([True, right_side_up,[x,w,y,h]])#acrescentei
     
     if w >= h: #image is horizontal
       if x == 0: pointing_right = True
@@ -90,8 +95,9 @@ def crop_mask(contours, mask):
       if horizontal_cropped_mask is None:
         return mask
       mask[y:y+h,x:x+w] = horizontal_cropped_mask
-
-  return mask
+      orientation_info.append([False,pointing_right,[x,w,y,h]]) #acrescentei
+  
+  return mask,orientation_info
 
 def crop_vertical_mask(mask, right_side_up):
   '''Crops a hand mask by the wrist, where the hand is vertical

@@ -104,19 +104,23 @@ def open_label_image_window(frame):
 
   mask = get_mask(frame, thresholds)
   frame_copy, text = get_fingers(mask, frame)
-  add_string_frame(frame_copy, text)
+  if len(text) > 0:
+    add_string_to_frame(frame_copy, text[0], True)
+    if len(text) > 1:
+      add_string_to_frame(frame_copy, text[0], False)
   cv.imshow(title, frame_copy)
 
 
-def add_string_frame(frame, string):
-  '''Adds text to the bottom left of the given frame
+def add_string_to_frame(frame, string, is_left):
+  '''Adds text to the bottom of the given frame
   
   Arguments:
     frame {Mat} -- Frame to add the string
     string {String} -- Text to be added
+    is_left {Boolean} -- If text is to be added to the left, else is added to the right
   '''
 
-  bottom_point = (5, frame.shape[0] - 5)
   text_size = cv.getTextSize(string, cv.FONT_HERSHEY_SIMPLEX, 1.5, 2)
-  cv.rectangle(frame, (0, frame.shape[0]), (bottom_point[0] + text_size[0][0], bottom_point[1] - text_size[0][1] - 5), (255,255,255), -1 )
+  bottom_point = (5, frame.shape[0] - 5) if is_left else (frame.shape[1] - text_size[0][0] - 5, frame.shape[0] - 5)
+  cv.rectangle(frame, (bottom_point[0] - 5, bottom_point[1] + 5), (bottom_point[0] + text_size[0][0] + 5, bottom_point[1] - text_size[0][1] - 5), (255,255,255), -1 )
   cv.putText(frame, string, bottom_point, cv.FONT_HERSHEY_SIMPLEX, 1.5, (0,0,0), 2)
