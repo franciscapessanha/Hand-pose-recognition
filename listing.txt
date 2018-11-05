@@ -1,0 +1,10 @@
+main.py - Function to be called that runs the program
+display.py - Functions that handle running program window
+helpers.py - Helper functions for program execution
+sample_skin_color.py - Functions that handle sampling and calculating mask thresholds
+calculate_contours.py - Functions that handle calculating hand contours
+calculate_mask.py - Functions that handle creation and refining fo hand mask
+calculate_convex_hull.py - Functions that handle calculating the convex hulls for both hands
+calculate_fingers.py - Functions that handle counting and identifying hand positions
+requirements.txt - Library requirements for installing with pip
+usage.txt - File detailing usage details for the program
