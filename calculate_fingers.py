@@ -142,6 +142,7 @@ def filter_vertices_by_distance(pt0, pt1, orientation):
     Boolean -- True if the distance between the hand's centroid and fingertip is valid
   '''
   dist_max_offset = 0.55
+  distance = None
 
   if "vertical" in orientation:
     if "up" in orientation: #vertical image with finger on the top border
@@ -183,7 +184,8 @@ def filter_vertices_by_distance(pt0, pt1, orientation):
 
   if distance is None:
     print("Sampling error")
-    distance = -1    
+    distance = -1
+    dist_max = 0    
   return distance > dist_max_offset * dist_max
 
 def identify_fingers(count_fingers_list, orientations):
