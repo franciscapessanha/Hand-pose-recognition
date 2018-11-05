@@ -21,7 +21,6 @@ def get_fingers(mask, frame):
   contours, orientations = get_contours(mask)
   draw_contours(frame_copy, contours)
   hulls, clustered_hulls_vertices = get_convex_hulls(contours)
-  cv.imshow("mask", mask)
   #draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices)
   contours_with_defects = calculate_convexity_defects(contours, clustered_hulls_vertices)
   count_fingers_list = draw_defects(frame_copy, contours_with_defects, mask,contours, orientations)
