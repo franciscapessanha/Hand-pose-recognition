@@ -95,7 +95,8 @@ def crop_mask(contours, mask):
       if horizontal_cropped_mask is None:
         return mask, finger_orientations
       mask[y:y + h, x:x + w] = horizontal_cropped_mask
-      finger_orientations.append([pointing_right]) 
+      finger_orientations.append([pointing_right])
+
   return mask, finger_orientations
 
 def crop_vertical_mask(mask, right_side_up):
@@ -152,6 +153,7 @@ def crop_horizontal_mask(mask, pointing_right):
     for i in range(0, len(left_to_right) - 20):
       if left_to_right[i + 20] > 1.05 * left_to_right[i]:
         index_in_mask = i
+        print(i)
         non_zero_indexes = np.argwhere(mask[:, index_in_mask - 1])
         first = non_zero_indexes[0]
         last = non_zero_indexes[-1]
