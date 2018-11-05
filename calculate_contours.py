@@ -81,7 +81,9 @@ def crop_mask(contours, mask):
     x, y, w, h= cv.boundingRect(contour)
     cropped_mask = mask[y:y + h, x:x + w]
     
+    mask_row_sum = np.sum(mask, axis = 1)
     if h > w: #image is vertical
+      print("entrou vertical")
       right_side_up = not y == 0
       vertical_cropped_mask = crop_vertical_mask(cropped_mask, right_side_up)
       if vertical_cropped_mask is None:
@@ -90,6 +92,7 @@ def crop_mask(contours, mask):
       finger_orientations.append([right_side_up])
     
     if w >= h: #image is horizontal
+      print("entrou horizontal")
       pointing_right = x == 0
       horizontal_cropped_mask = crop_horizontal_mask(cropped_mask, pointing_right)
       if horizontal_cropped_mask is None:
@@ -148,12 +151,13 @@ def crop_horizontal_mask(mask, pointing_right):
     Mat -- Mask with cropped wrist and arm
   '''
   mask_col_sum = np.sum(mask, axis = 0)
+  print(mask_col_sum)
   if pointing_right:
     left_to_right = mask_col_sum 
     for i in range(0, len(left_to_right) - 20):
       if left_to_right[i + 20] > 1.05 * left_to_right[i]:
         index_in_mask = i
-        print(i)
+        print(index_in_mask)
         non_zero_indexes = np.argwhere(mask[:, index_in_mask - 1])
         first = non_zero_indexes[0]
         last = non_zero_indexes[-1]
