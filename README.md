@@ -1,7 +1,7 @@
 
 # Hand Recognition
 
-Introduction and what not
+In the present work, we applied a computer vision approach,  based on the hand position and outline, to recognition of simple hand gestures: digits from zero to five and four gestures, the OK, not OK, pointer and all right. 
 
 ## Demo
 
@@ -10,31 +10,30 @@ Introduction and what not
 ```bash
 pip install -r requirements.txt
 ```
+## Running
 
-## Usage
-
-### Running
-
-##### Video Capture Device (WebCam):
+#### Video Capture Device (WebCam):
 
 ```bash
 python3 main.py <video-capture-device-id>
 ```
 if run without parameters it will default to video capture device with id 0
 
-##### Specific File
+#### Specific File
 
 ```bash
 python3 main.py <file-path>
 ```
 only `.mp4`, `.jpg` and `.png` files are supported
 
-### Basic Usage
-When first open press `ENTER` to sample hand skin color, using the mouse, confirm the region by pressing `ENTER` again.
+## Usage
+When first opened press `ENTER` to sample hand skin color using the mouse, confirm the region by pressing `ENTER` again.
 
-Press `C` to open the calibration window, confirm calibration by pressing `ENTER`.
+The threshold values calculated from this sample are saved locally on a 'thresholds' file, and are used by default the next time the program is opened. To change this values, the user can calibrate or re-sample the skin color.
 
-Press `S` to open the sampling window, confirm the region by pressing `ENTER`.
+To calibrate the values, press `C` to open the calibration window, confirm calibration by pressing `ENTER`.
+
+To re-sample skin color and calculate new values, press `S` to open the sampling window, confirm the region by pressing `ENTER`.
 
 Press `Space` to pause/resume if it's a video input.
 
