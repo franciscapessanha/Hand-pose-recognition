@@ -74,7 +74,7 @@ def draw_defects(frame, contours_with_defects, mask,contours, orientations):
         continue
       #cv.circle(frame,tuple(new_triple[1]), 5, [0, 0, 255], 3)
       if filter_vertices_by_angle(new_triple, 90) and filter_vertices_by_distance([centroid_x,centroid_y], new_triple[1],orientation):
-          cv.circle(frame,tuple(new_triple[1]), 5, [0, 0, 255], 3)
+          cv.circle(frame,tuple(new_triple[1]), 8, [0, 0, 255], 3)
 
           '''
           # To show the convexity defects on the original frame
