@@ -17,8 +17,9 @@ def get_contours(mask):
   mask = fill_contours(contours, mask)
   mask, orientations = crop_mask(contours, mask)
   contours = find_contours(mask)
-  contours = sort_contours(contours)
   mask = fill_contours(contours, mask)
+  contours = sort_contours(contours)
+  
   return contours, orientations
 
 def find_contours(mask):
@@ -33,7 +34,7 @@ def find_contours(mask):
 
   _ , contours, _ = cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
   contours = sorted(contours, key = cv.contourArea, reverse = True) 
-  contours = [contours[i] for i in range(len(contours)) if cv.contourArea(contours[i]) > 0.50 * cv.contourArea(contours[0])]
+  contours = [contours[i] for i in range(len(contours)) if cv.contourArea(contours[i]) > 0.30 * cv.contourArea(contours[0])]
 
   return contours
 
@@ -81,13 +82,13 @@ def crop_mask(contours, mask):
   for i in range(len(contours)):
     x, y, w, h = boundingBoxes[i]
     cropped_mask = mask[y:y + h, x:x + w]
-    
+
     if y == 0 or y + h == mask.shape[0]: #image is vertical
       right_side_up = not y == 0
       vertical_cropped_mask = crop_vertical_mask(cropped_mask, right_side_up)
       if vertical_cropped_mask is None:
         return mask, finger_orientations
-      finger_orientations.append((not y == 0,-1))
+      finger_orientations.append(["up" if not y == 0 else "down"])
       mask[y:y + h, x:x + w] = vertical_cropped_mask
     
     elif x == 0 or (x + w) == mask.shape[1]: #image is horizontal
@@ -96,9 +97,9 @@ def crop_mask(contours, mask):
       if horizontal_cropped_mask is None:
         return mask, finger_orientations
       mask[y:y + h, x:x + w] = horizontal_cropped_mask
-      finger_orientations.append((-1,x==0))
-  
-  (finger_orientations, boundingBoxes) = zip(*sorted(zip(finger_orientations, boundingBoxes), key = lambda b:b[1][i], reverse = True))
+      finger_orientations.append(["right" if x==0 else "left"])
+
+  (finger_orientations, boundingBoxes) = zip(*sorted(zip(finger_orientations, boundingBoxes), key = lambda b:b[1][i], reverse = False))
   return mask, finger_orientations
 
 def crop_vertical_mask(mask, right_side_up):
@@ -187,7 +188,7 @@ def sort_contours(contours, method=True):
   '''
   # initialize the reverse flag and sort index
   i = 0 if method else 1
- 
   boundingBoxes = [cv.boundingRect(contour) for contour in contours]
-  (contours_sorted, boundingBoxes) = zip(*sorted(zip(contours, boundingBoxes), key = lambda b:b[1][i], reverse = method))
+  (contours_sorted, boundingBoxes) = zip(*sorted(zip(contours, boundingBoxes), key = lambda b:b[1][i], reverse = True))
+
   return contours_sorted
