@@ -55,6 +55,7 @@ def draw_defects(frame, contours_with_defects, mask,contours, orientations):
     cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
     orientation.insert(0, h > w)
     orientation.append([x,w,y,h])
+    print(orientation)
 
     count_fingers = 0
 
@@ -73,7 +74,7 @@ def draw_defects(frame, contours_with_defects, mask,contours, orientations):
       if check_mask_cutoff(triple1, triple2):
         cv.circle(frame, tuple(new_triple[1]), 3, [0, 255, 0], 3)
         continue
-
+      #cv.circle(frame,tuple(new_triple[1]), 5, [0, 0, 255], 3)
       if filter_vertices_by_angle(new_triple, 90) and filter_vertices_by_distance([centroid_x,centroid_y], new_triple[1],orientation):
           cv.circle(frame,tuple(new_triple[1]), 5, [0, 0, 255], 3)
 
@@ -117,7 +118,6 @@ def filter_vertices_by_angle(triple, max_angle):
   b = linalg.norm(triple[1] - triple[2])
   c = linalg.norm(triple[1] - triple[0])
   angle = np.arccos(((b ** 2 + c ** 2 - a ** 2) /(2 * b * c))) * (180 / np.pi)
-  
   return angle < max_angle
 
 def calculate_distance(pt0, pt1):
@@ -183,7 +183,6 @@ def filter_vertices_by_distance(pt0, pt1, orientation):
         distance = 0
       else:
         distance = calculate_distance(pt0, pt1)
-
   return distance > dist_max_offset * dist_max
 
 def identify_fingers(count_fingers_list, orientations):

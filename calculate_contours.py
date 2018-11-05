@@ -17,7 +17,7 @@ def get_contours(mask):
   mask = fill_contours(contours, mask)
   mask, orientations = crop_mask(contours, mask)
   contours = find_contours(mask)
-  contours = sort_contours(contours)
+  contours,orientations = sort_contours(contours, orientations)
   mask = fill_contours(contours, mask)
   return contours, orientations
 
@@ -174,7 +174,7 @@ def crop_horizontal_mask(mask, pointing_right):
         mask[0:mask.shape[0], index_in_mask:mask.shape[1]] = 0
         return mask
 
-def sort_contours(contours, method=True):
+def sort_contours(contours, orientation, method=True):
   '''Returns the contours sorted from top to bottom/left to right or from bottom to top/right to left depending if
   the method is True or False,respectively
   
@@ -186,8 +186,19 @@ def sort_contours(contours, method=True):
   '''
   # initialize the reverse flag and sort index
   i = 0 if method else 1
-
+ 
   boundingBoxes = [cv.boundingRect(contour) for contour in contours]
-  (contours, boundingBoxes) = zip(*sorted(zip(contours, boundingBoxes), key = lambda b:b[1][i], reverse = method))
+  (contours_sorted, boundingBoxes) = zip(*sorted(zip(contours, boundingBoxes), key = lambda b:b[1][i], reverse = method))
+  new_orientation=orientation.copy()
+  print(orientation)
+  print(new_orientation)
+  print(cv.contourArea(contours[0]))
+  print(cv.contourArea(contours_sorted[0]))
 
-  return contours
+  if len(contours)>1:
+    for j in range(len(contours)):
+      for i in range(len(contours)):
+        if cv.contourArea(contours[j])==cv.contourArea(contours_sorted[i]): new_orientation[i]=orientation[j]
+  print(new_orientation)
+
+  return contours_sorted, new_orientation
