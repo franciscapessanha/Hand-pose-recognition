@@ -70,11 +70,13 @@ def draw_defects(frame, contours_with_defects, mask,contours, orientations):
       triple2 = contour_with_defects[i - 1]
       new_triple = [triple1[1], triple2[2], triple2[1]]
 
+      
       if check_mask_cutoff(triple1, triple2):
         cv.circle(frame, tuple(new_triple[1]), 3, [0, 255, 0], 3)
         continue
-
+      
       if filter_vertices_by_angle(new_triple, 90) and filter_vertices_by_distance([centroid_x,centroid_y], new_triple[1],orientation):
+      #if filter_vertices_by_angle(new_triple, 90):
           cv.circle(frame,tuple(new_triple[1]), 5, [0, 0, 255], 3)
 
           '''
@@ -183,6 +185,9 @@ def filter_vertices_by_distance(pt0, pt1, orientation):
         distance = 0
       else:
         distance = calculate_distance(pt0, pt1)
+
+    print(distance)
+    print(dist_max)
 
   return distance > dist_max_offset * dist_max
 

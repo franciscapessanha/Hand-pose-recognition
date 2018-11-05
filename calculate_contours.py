@@ -82,27 +82,56 @@ def crop_mask(contours, mask):
     cropped_mask = mask[y:y + h, x:x + w]
     
     mask_row_sum = np.sum(mask, axis = 1)
-    if h > w: #image is vertical
-      print("entrou vertical")
+    mask_col_sum = np.sum(mask, axis = 0)
+    
+    if mask_row_sum[0] != 0 or mask_row_sum[-1] != 0: 
       right_side_up = not y == 0
-      vertical_cropped_mask = crop_vertical_mask(cropped_mask, right_side_up)
+      vertical_cropped_mask = crop_vertical_mask(cropped_mask, right_side_up,mask_row_sum)
       if vertical_cropped_mask is None:
         return mask, finger_orientations
       mask[y:y + h, x:x + w] = vertical_cropped_mask
-      finger_orientations.append([right_side_up])
-    
-    if w >= h: #image is horizontal
-      print("entrou horizontal")
+
+    elif mask_col_sum[0] != 0 or mask_col_sum[-1] != 0:
       pointing_right = x == 0
-      horizontal_cropped_mask = crop_horizontal_mask(cropped_mask, pointing_right)
+      horizontal_cropped_mask = crop_horizontal_mask(cropped_mask, pointing_right,mask_col_sum)
       if horizontal_cropped_mask is None:
         return mask, finger_orientations
       mask[y:y + h, x:x + w] = horizontal_cropped_mask
-      finger_orientations.append([pointing_right])
 
+    new_contour = find_contours(mask[y:y + h, x:x + w])
+    x1, y1, w1, h1= cv.boundingRect(new_contour[0])
+
+    print("x1")
+    print(x1)
+    print("y1")
+    print(y1)
+
+    mask_row_sum = np.sum(mask[y:y + h, x:x + w], axis = 1)
+    mask_col_sum = np.sum(mask[y:y + h, x:x + w], axis = 0)
+
+    if h1 > w1: #vertical
+      print("vertical")
+      if mask_row_sum[int()] > mask_row_sum[0]:
+       right_side_up = True
+       print("right side up")
+      elif mask_row_sum[int(0.5*h1)] > mask_row_sum[h1]: 
+       right_side_up = False
+      finger_orientations.append([right_side_up])
+    
+    elif w1 > h1: #horizontal
+      print("horizontal")
+      print(mask_col_sum[x: x+w1])
+      if mask_col_sum[0] > mask_col_sum[w1]:
+       pointing_right = True
+       print("pointing right")
+      else:
+        pointing_right = False
+        print("pointing left")
+      finger_orientations.append([pointing_right])
+  
   return mask, finger_orientations
 
-def crop_vertical_mask(mask, right_side_up):
+def crop_vertical_mask(mask, right_side_up, mask_row_sum):
   '''Crops a hand mask by the wrist, where the hand is vertical
   
   Arguments:
@@ -112,8 +141,6 @@ def crop_vertical_mask(mask, right_side_up):
   Returns:
     Mat -- Mask with cropped wrist and arm
   '''
-
-  mask_row_sum = np.sum(mask, axis = 1)
   if right_side_up:
     bottom_to_top = list(reversed(mask_row_sum))
     for i in range(0, len(bottom_to_top) - 20):
@@ -140,7 +167,7 @@ def crop_vertical_mask(mask, right_side_up):
         return mask
 
 
-def crop_horizontal_mask(mask, pointing_right):
+def crop_horizontal_mask(mask, pointing_right, mask_col_sum):
   '''Crops a hand mask by the wrist, where the hand is horizontal
   
   Arguments:
@@ -150,8 +177,7 @@ def crop_horizontal_mask(mask, pointing_right):
   Returns:
     Mat -- Mask with cropped wrist and arm
   '''
-  mask_col_sum = np.sum(mask, axis = 0)
-  print(mask_col_sum)
+
   if pointing_right:
     left_to_right = mask_col_sum 
     for i in range(0, len(left_to_right) - 20):
