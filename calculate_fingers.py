@@ -21,11 +21,12 @@ def get_fingers(mask, frame):
   contours, orientations = get_contours(mask)
   draw_contours(frame_copy, contours)
   hulls, clustered_hulls_vertices = get_convex_hulls(contours)
+
   #draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices)
   contours_with_defects = calculate_convexity_defects(contours, clustered_hulls_vertices)
-  count_fingers_list = draw_defects(frame_copy, contours_with_defects, mask,contours, orientations)
-  text = identify_fingers(count_fingers_list, orientations)
-
+  #count_fingers_list = draw_defects(frame_copy, contours_with_defects, mask,contours, orientations)
+  #text = identify_fingers(count_fingers_list, orientations)
+  text = ''
   return frame_copy, text
 
 def draw_defects(frame, contours_with_defects, mask,contours, orientations):
@@ -55,7 +56,6 @@ def draw_defects(frame, contours_with_defects, mask,contours, orientations):
     cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
     orientation.insert(0, h > w)
     orientation.append([x,w,y,h])
-    print(orientation)
 
     count_fingers = 0
 
