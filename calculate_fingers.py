@@ -21,12 +21,12 @@ def get_fingers(mask, frame):
   contours, orientations = get_contours(mask)
   draw_contours(frame_copy, contours)
   hulls, clustered_hulls_vertices = get_convex_hulls(contours)
-
+  cv.imshow("mask", mask)
   #draw_hulls_and_vertices(frame_copy,hulls,clustered_hulls_vertices)
   contours_with_defects = calculate_convexity_defects(contours, clustered_hulls_vertices)
-  #count_fingers_list = draw_defects(frame_copy, contours_with_defects, mask,contours, orientations)
-  #text = identify_fingers(count_fingers_list, orientations)
-  text = ''
+  count_fingers_list = draw_defects(frame_copy, contours_with_defects, mask,contours, orientations)
+  text = identify_fingers(count_fingers_list, orientations)
+
   return frame_copy, text
 
 def draw_defects(frame, contours_with_defects, mask,contours, orientations):
@@ -53,8 +53,7 @@ def draw_defects(frame, contours_with_defects, mask,contours, orientations):
     centroid_y = int(M['m01'] / M['m00'])
 
     x, y, w, h= cv.boundingRect(contour)
-    cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-    orientation.insert(0, h > w)
+    orientation.append("vertical" if h > w else "horizontal") #true if the cropped mask is vertical
     orientation.append([x,w,y,h])
 
     count_fingers = 0
@@ -72,7 +71,6 @@ def draw_defects(frame, contours_with_defects, mask,contours, orientations):
       new_triple = [triple1[1], triple2[2], triple2[1]]
 
       if check_mask_cutoff(triple1, triple2):
-        cv.circle(frame, tuple(new_triple[1]), 3, [0, 255, 0], 3)
         continue
       #cv.circle(frame,tuple(new_triple[1]), 5, [0, 0, 255], 3)
       if filter_vertices_by_angle(new_triple, 90) and filter_vertices_by_distance([centroid_x,centroid_y], new_triple[1],orientation):
@@ -146,43 +144,47 @@ def filter_vertices_by_distance(pt0, pt1, orientation):
   '''
   dist_max_offset = 0.55
 
-  if orientation[0]:
-    if orientation[1]: #vertical image with finger on the top border
-      dist_max = max(abs(calculate_distance(pt0, [orientation[2][0], orientation[2][2]])), abs(calculate_distance(pt0, [orientation[2][0] + orientation[2][1], orientation[2][2]])))
+  if "vertical" in orientation:
+    if "up" in orientation: #vertical image with finger on the top border
+      dist_max = max(abs(calculate_distance(pt0, [orientation[-1][0], orientation[-1][2]])), abs(calculate_distance(pt0, [orientation[-1][0] + orientation[-1][1], orientation[-1][2]])))
       distance = calculate_distance(pt0, pt1)
 
-      if pt0[1] + orientation[2][3] / 8 - pt1[1] < 0: # centroid (x0, y0 + w/10)
+      if pt0[1] + orientation[-1][3] / 8 - pt1[1] < 0: # centroid (x0, y0 + w/10)
         distance = 0
       else:
         distance = calculate_distance(pt0, pt1)
   
-    else: #vertical image with finger on the bottom border
-      dist_max = max(abs(calculate_distance(pt0, [orientation[2][0], orientation[2][2] + orientation[2][3]])), abs(calculate_distance(pt0, [orientation[2][0] + orientation[2][1], orientation[2][2] + orientation[2][3]])))
+    elif "down" in orientation: #vertical image with finger on the bottom border
+      dist_max = max(abs(calculate_distance(pt0, [orientation[-1][0], orientation[-1][2] + orientation[-1][3]])), abs(calculate_distance(pt0, [orientation[-1][0] + orientation[-1][1], orientation[-1][2] + orientation[-1][3]])))
       distance = calculate_distance(pt0, pt1)
       
-      if pt0[1] - orientation[2][3] / 8 - pt1[1] > 0: # centroid (x0, y0 - w/10)
+      if pt0[1] - orientation[-1][3] / 8 - pt1[1] > 0: # centroid (x0, y0 - w/10)
         distance = 0
       else:
         distance = calculate_distance(pt0, pt1)
-
-  else:
-    if orientation[1]: #horizontal image with finger on the right border
-      dist_max = max(abs(calculate_distance(pt0, [orientation[2][0] + orientation[2][1], orientation[2][2]])), abs(calculate_distance(pt0, [orientation[2][0] + orientation[2][1], orientation[2][2] + orientation[2][3]])))
+    
+  elif "horizontal" in orientation:
+    if "right" in orientation: #horizontal image with finger pointing right
+      dist_max = max(abs(calculate_distance(pt0, [orientation[-1][0] + orientation[-1][1], orientation[-1][2]])), abs(calculate_distance(pt0, [orientation[-1][0] + orientation[-1][1], orientation[-1][2] + orientation[-1][3]])))
       distance = calculate_distance(pt0, pt1)
       
-      if pt0[0] - (orientation[2][1]) / 8 - pt1[0] > 0:
+      if pt0[0] - (orientation[-1][1]) / 8 - pt1[0] > 0:
         distance = 0
       else:
         distance = calculate_distance(pt0, pt1)
         
-    else: #horizontal image with finger on the left border
-      dist_max = max(abs(calculate_distance(pt0, [orientation[2][0], orientation[2][2]])), abs(calculate_distance(pt0, [orientation[2][0], orientation[2][2] + orientation[2][3]])))
+    elif "left" in orientation: #horizontal image with finger pointing left
+      dist_max = max(abs(calculate_distance(pt0, [orientation[-1][0], orientation[-1][2]])), abs(calculate_distance(pt0, [orientation[-1][0], orientation[-1][2] + orientation[-1][3]])))
       distance = calculate_distance(pt0, pt1)
       
-      if pt0[0] + (orientation[2][1] / 8) - pt1[0] < 0: 
+      if pt0[0] + (orientation[-1][1] / 8) - pt1[0] < 0: 
         distance = 0
       else:
         distance = calculate_distance(pt0, pt1)
+
+  if distance is None:
+    print("Sampling error")
+    distance = -1    
   return distance > dist_max_offset * dist_max
 
 def identify_fingers(count_fingers_list, orientations):
@@ -202,25 +204,23 @@ def identify_fingers(count_fingers_list, orientations):
 
   for count_fingers, orientation in zip(count_fingers_list, orientations):
     hand_gesture = ''
-    ratio_width_height = orientation[2][1] / orientation[2][3] # width/height
+    ratio_width_height = orientation[-1][1] / orientation[-1][3] # width/height
     if count_fingers == 1:
-      if orientation[0]: #image is vertical
-        if ratio_width_height > 0.65:
-          if orientation[1]: #thumbs up
-            text.append('ok')
-          else: #thumbs down
-            text.append('not ok')
-        else:
+      if (ratio_width_height > 0.65 and orientation[-1][3] > orientation[-1][1]) or (ratio_width_height < 1.54 and orientation[-1][1] > orientation[-1][3]):
+        text.append('ok')
+
+      elif "vertical" in orientation: #image is vertical
           hand_count_list.append(1)
           text.append(str(count_fingers))
-      else: #image is horizontal
-        if orientation[1]: #pointing right
+     
+      elif "horizontal" in orientation: #image is horizontal
+        if "right" in orientation: #pointing right
           text.append('pointing right')
-        else: #pointing left
+        elif "left" in orientation: #pointing left
           text.append('pointing left')
 
     elif count_fingers == 3:
-      if orientation[0] and orientation[1]: #image is vertical and three fingers up
+      if "vertical" and "up" in orientation: #image is vertical and three fingers up
         if ratio_width_height > 0.65:
           text.append('all right')
         else: #image is vertical and three fingers down
@@ -235,6 +235,5 @@ def identify_fingers(count_fingers_list, orientations):
       text.append(str(count_fingers))
 
   text = text[::-1]
-
   return text
 
