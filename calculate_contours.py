@@ -78,9 +78,9 @@ def crop_mask(contours, mask):
       True if fingers up or pointing right), False if finger down or pointing left
   '''
   finger_orientations = []
-  boundingBoxes = [cv.boundingRect(contour) for contour in contours]
+  bounding_boxes = [cv.boundingRect(contour) for contour in contours]
   for i in range(len(contours)):
-    x, y, w, h = boundingBoxes[i]
+    x, y, w, h = bounding_boxes[i]
     cropped_mask = mask[y:y + h, x:x + w]
 
     if y == 0 or y + h == mask.shape[0]: #image is vertical
@@ -99,7 +99,10 @@ def crop_mask(contours, mask):
       mask[y:y + h, x:x + w] = horizontal_cropped_mask
       finger_orientations.append(["right" if x==0 else "left"])
 
-  (finger_orientations, boundingBoxes) = zip(*sorted(zip(finger_orientations, boundingBoxes), key = lambda b:b[1][i], reverse = False))
+  if(len(finger_orientations) == 0 or len(bounding_boxes) == 0):
+    return mask, finger_orientations
+
+  (finger_orientations, bounding_boxes) = zip(*sorted(zip(finger_orientations, bounding_boxes), key = lambda b:b[1][i], reverse = False))
   return mask, finger_orientations
 
 def crop_vertical_mask(mask, right_side_up):
