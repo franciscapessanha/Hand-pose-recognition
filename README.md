@@ -1,5 +1,5 @@
 
-# Hand Recognition :wave: 
+# Hand Gesture Recognition :ok_hand: 
 
 In the present work, we applied a computer vision approach,  based on the hand position and outline, to recognition of simple hand gestures: digits from zero to five and four gestures, the OK, not OK, pointer and all right. 
 
